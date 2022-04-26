@@ -1,5 +1,6 @@
 {
   "name": "Jesteer",
+  "description": "Imagine a world where tests write themselves",
   "version": "1.0",
   "manifest_version": 3,
   "background": {
@@ -9,6 +10,5 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "options_page": "options.html",
-  "devtools_page": "devtools.html"
+  "options_page": "options.html"
 }
