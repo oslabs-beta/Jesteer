@@ -1,4 +1,6 @@
-btnSnapshot.addEventListener("click", async () => {
+//Javascript Components for the popup page when the extension icon is clicked
+
+btnSnapshot.addEventListener('click', async () => {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   chrome.scripting.executeScript({
@@ -11,9 +13,16 @@ btnSnapshot.addEventListener("click", async () => {
     target: {tabId: tab.id},
     css: '*[___jesteer___highlight] { background-color: yellow !important; }'
   });
+
+  window.close();
 });
 
-
+// btnDownload.addEventListener('click', () => {
+  
+//   const blob = new Blob(['Hello World', 'Goodbye'], {type: 'text/plain'});
+//   const url = URL.createObjectURL(blob);
+//   chrome.runtime.sendMessage({type: 'download', url});
+// });
 
 function snapshot() {
   //Helper Function to return a Selector Path to the given element
@@ -65,14 +74,22 @@ function snapshot() {
     console.log('Element:');
     console.log(e.target);
     console.log('Selector Path:');
-    console.log(getSelectorPath(e.target));
+    const sp = getSelectorPath(e.target);
+    console.log(sp);
+
+    const blob = new Blob([sp], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    chrome.runtime.sendMessage({type: 'download', url});
 
     // Stop the event listeners after the snapshot is generated
     document.removeEventListener('mouseover', select);
     document.removeEventListener('mouseout', deselect);
-    document.removeEventListener('click', snap)
+    document.removeEventListener('click', snap);
   };
 
+
+
+  
   //Add Event Listeners for Highlighting and Logging-on-Click
   document.addEventListener('mouseover', select);
   document.addEventListener('mouseout', deselect);
