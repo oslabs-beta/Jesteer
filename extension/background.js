@@ -12,6 +12,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.type) {
     // Download Snapshot
     case 'download':
+      //
       chrome.downloads.download({
         url: request.url,
         filename: 'snapshot.js'
@@ -31,7 +32,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Cancel recording on tab changed
-chrome.tabs.onActivated.addListener(() => {
+// Abort recording on tab changed
+chrome.tabs.onUpdated.addListener(() => {
+  // This logic will eventually need to be more sophisticated
+  // TODO: Consider saving the existing recording for picking up where it was left off
+
   chrome.storage.local.set({recording: false});
 });
