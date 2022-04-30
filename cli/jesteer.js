@@ -1,3 +1,13 @@
+/* 
+
+Entry point to Jesteer. Takes two arguments:
+  - Absolute filepath to folder containing Chrome Recorder-generated Puppeteer Scripts
+  - Absolute filepath to folder containing identically named .txt files, containing newline-separated css selectors—the elements we want to make snapshots of.
+
+After you run this program, you'll get a new folder called generated, which will contain a new puppeteer testing suite.
+
+*/
+
 const lib = require('./scripts/recorderConverterLib.js');
 const args = process.argv.slice(2);
 const path = require('path');
