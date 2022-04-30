@@ -9,6 +9,7 @@ btnSnapshot.addEventListener('click', async () => {
   });
 
   // Add styling to elements with our custom attribute
+  // TODO: Undo this on stop recording
   chrome.scripting.insertCSS({
     target: {tabId: tab.id},
     css: '*[___jesteer___highlight] { background-color: yellow !important; }'
