@@ -6,12 +6,12 @@ const recordButtonUpdate = (rec) => {
   btnRecord.innerText = rec ? 'Stop Recording' : 'Record';
 }
 
-
 // This sets the Record Button to have the correct message on startup
 chrome.storage.local.get('recording', ({recording}) => {
   recordButtonUpdate(recording);
 });
 
+// handle clicking the record button
 btnRecord.addEventListener('click', async () => {
   //Get activeTab
   let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
@@ -81,11 +81,18 @@ function toggleListeners(rec) {
     chrome.runtime.sendMessage({type: 'recordAction', action: {type: 'click', element: getSelectorPath(e.target)}});
   }
 
+  // typed serves as a buffer we use to hold the characters typed so far.
+  // let typed = ''
+  // const handleKeydown = e => {
+
+  // }
+
   
   if (rec) {
     // When we begin recording, inject our event listener(s)
     document.___jesteer = {}; // Container object which holds functionality we injected
-    document.addEventListener('click', document.___jesteer.handleClick = function fn(e) {handleClick(e)});
+    document.addEventListener('click', document.___jesteer.handleClick = function fn(e) { handleClick(e) });
+    // document.addEventListener('keydown', document.___jesteer.handleKeydown = function fn(e) { handleKeydown(e) });
   } else {
     // When we stop recording, remove them
     document.removeEventListener('click', document.___jesteer.handleClick);

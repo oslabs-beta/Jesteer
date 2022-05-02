@@ -4,6 +4,10 @@ btnSnapshot.addEventListener('click', async () => {
   // Get activeTab
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+  chrome.scripting.executeScript({
+    target: {tabId: tab.id},
+    files: ['static/gsp.js']
+  });
   // Execute the 'snapshot' function in the context of the current webpage
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -24,37 +28,6 @@ btnSnapshot.addEventListener('click', async () => {
 
 // Injects the event listeners that select/deselect DOM elements
 function prepareSnapshot() {
-  // Helper Function to return a Selector Path to the given element
-  function getSelectorPath(element) {
-    /// trying to modularize out getSelectorPath
-    // TODO: This function is copied verbatim in two place.
-    // This is not DRY.
-    // Maybe a static method on a Class?
-  
-    const names = [];
-    while (element.parentNode) {
-      if (element.id) {
-        names.unshift('#' + element.id);
-        break;
-  
-      } else {
-  
-        if (element === element.ownerDocument.documentElement) names.unshift(element.tagName);
-        else {
-          let e = element;
-          let i = 1;
-  
-          while (e.previousElementSibling) {
-            e = e.previousElementSibling;
-            i++;
-          }
-          names.unshift(`${ element.tagName }:nth-child(${ i })`);
-        }
-      }
-      element = element.parentNode;
-    }
-    return names.join(' > ');
-  }
 
   //Helper functions for selecting and deselecting elements
   const select = e => e.target.setAttribute('___jesteer___highlight', '');
@@ -68,7 +41,9 @@ function prepareSnapshot() {
     console.log('Element:');
     console.log(e.target);
     console.log('Selector Path:');
-    const selectorPath = getSelectorPath(e.target);
+    // console.log(document.___jesteer.getSelectorPath);
+    const selectorPath = getSelectorPath(e.target); // 
+    console.log(selectorPath);
 
     // const blob = new Blob([sp], {type: 'text/plain'});
     // const url = URL.createObjectURL(blob);
