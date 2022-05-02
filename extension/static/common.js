@@ -1,9 +1,5 @@
 // Helper Function to return a Selector Path to the given element
 function getSelectorPath(element) {
-  /// trying to modularize out getSelectorPath
-  // TODO: This function is copied verbatim in two place.
-  // This is not DRY.
-  // Maybe a static method on a Class?
 
   const names = [];
   while (element.parentNode) {

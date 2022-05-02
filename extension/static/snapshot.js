@@ -67,5 +67,3 @@ function prepareSnapshot() {
   document.addEventListener('mouseout', deselect);
   document.addEventListener('click', snap);
 }
-
-//TODO: Some ordering is still somewhat unclear
