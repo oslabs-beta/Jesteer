@@ -7,17 +7,17 @@ const recordButtonUpdate = (rec) => {
 }
 
 // This sets the Record Button to have the correct message on startup
-chrome.storage.local.get('recording', ({recording}) => {
+chrome.storage.local.get('recording', ({ recording }) => {
   recordButtonUpdate(recording);
 });
 
 // handle clicking the record button
 btnRecord.addEventListener('click', async () => {
   //Get activeTab
-  let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   // Get the current recording state
-  let {recording} = await chrome.storage.local.get({recording: false});
+  let { recording } = await chrome.storage.local.get({ recording: false });
   // Toggle recording status (false -> true / true -> false)
   recording = !recording;
 
@@ -25,11 +25,11 @@ btnRecord.addEventListener('click', async () => {
   recordButtonUpdate(recording);
 
   // Set the new value in storage
-  chrome.storage.local.set({recording});
-  
+  chrome.storage.local.set({ recording });
+
   // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
   chrome.scripting.executeScript({
-    target: {tabId: tab.id},
+    target: { tabId: tab.id },
     function: toggleListeners,
     args: [recording]
   });
@@ -53,7 +53,7 @@ function toggleListeners(rec) {
       if (element.id) {
         names.unshift('#' + element.id);
         break;
-      } 
+      }
       else {
         if (element === element.ownerDocument.documentElement) names.unshift(element.tagName);
         else {
@@ -63,7 +63,7 @@ function toggleListeners(rec) {
             e = e.previousElementSibling;
             i++;
           }
-          names.unshift(`${ element.tagName }:nth-child(${ i })`);
+          names.unshift(`${element.tagName}:nth-child(${i})`);
         }
       }
       element = element.parentNode;
@@ -77,25 +77,22 @@ function toggleListeners(rec) {
     // TODO: Remove this line. This prevent for example hyperlinks from redirecting you elsewhere
     // as this may be a desired thing to test for
     e.preventDefault();
-
-    chrome.runtime.sendMessage({type: 'recordAction', action: {type: 'click', element: getSelectorPath(e.target)}});
+    chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'click', element: getSelectorPath(e.target) } });
   }
 
-  // typed serves as a buffer we use to hold the characters typed so far.
-  // let typed = ''
-  // const handleKeydown = e => {
+  const handleKeydown = e => {
+    chrome.runtime.sendMessage({ type: 'keydown', key: e.key });
+  }
 
-  // }
 
-  
   if (rec) {
     // When we begin recording, inject our event listener(s)
     document.___jesteer = {}; // Container object which holds functionality we injected
     document.addEventListener('click', document.___jesteer.handleClick = function fn(e) { handleClick(e) });
-    // document.addEventListener('keydown', document.___jesteer.handleKeydown = function fn(e) { handleKeydown(e) });
+    document.addEventListener('keydown', document.___jesteer.handleKeydown = function fn(e) { handleKeydown(e) });
   } else {
     // When we stop recording, remove them
     document.removeEventListener('click', document.___jesteer.handleClick);
-    chrome.runtime.sendMessage({type: 'stopRecording', url: window.location.href});
+    chrome.runtime.sendMessage({ type: 'stopRecording', url: window.location.href });
   }
 }
