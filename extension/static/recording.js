@@ -1,7 +1,10 @@
 // Handles logic for recording browser actions
 
 // Toggles the text on the Record Button to reflect the given Recording Status rec
-const recordButtonUpdate = (rec) => btnRecord.innerText = rec ? 'Stop Recording' : 'Record';
+const recordButtonUpdate = (rec) => {
+  btnSnapshot.disabled = !rec;
+  btnRecord.innerText = rec ? 'Stop Recording' : 'Record';
+}
 
 
 // This sets the Record Button to have the correct message on startup

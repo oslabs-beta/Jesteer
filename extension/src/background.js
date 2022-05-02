@@ -48,13 +48,10 @@ chrome.runtime.onMessage.addListener( function(message, sender, sendResponse) {
       
       `;
 
-      /*
-      Action Example: {
-        type: 'click',
-        element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
-      }
-      */
-
+      // Action Example: {
+      //   type: 'click',
+      //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
+      // }
       console.log(actions);
       for (let action of actions) {
         console.log(action)
