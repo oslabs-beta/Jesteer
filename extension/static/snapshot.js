@@ -5,7 +5,7 @@ btnSnapshot.addEventListener('click', async () => {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   chrome.scripting.executeScript({
-    target: {tabId: tab.id},
+    target: { tabId: tab.id },
     files: ['static/gsp.js']
   });
   // Execute the 'snapshot' function in the context of the current webpage
@@ -17,7 +17,7 @@ btnSnapshot.addEventListener('click', async () => {
   // Add styling to the attribute given to elements we're hovering over
   // TODO: Undo this on stop snapshot
   chrome.scripting.insertCSS({
-    target: {tabId: tab.id},
+    target: { tabId: tab.id },
     css: '*[___jesteer___highlight] { background-color: yellow !important; }'
   });
 
@@ -49,8 +49,8 @@ function prepareSnapshot() {
     // const url = URL.createObjectURL(blob);
     // chrome.runtime.sendMessage({type: 'download', url});
 
-    const action = {type: 'snapshot', element: selectorPath};
-    chrome.runtime.sendMessage({type: 'recordAction', action});
+    const action = { type: 'snapshot', element: selectorPath };
+    chrome.runtime.sendMessage({ type: 'recordAction', action });
 
     // Stop the event listeners after the snapshot is generated
     document.removeEventListener('mouseover', select);

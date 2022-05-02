@@ -59,7 +59,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       promises.push(targetPage.waitForNavigation());
       await targetPage.goto('${message.url}');
       await Promise.all(promises);
-      
       `;
 
       // Action Example: {
@@ -68,8 +67,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       // }
       console.log(actions);
       for (let action of actions) {
-        console.log(action)
-
+        console.log('action:', action);
         switch (action.type) {
           case 'keyboard':
             str +=
@@ -88,7 +86,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             break;
 
           case 'snapshot':
-
             str +=
               `
               const snapped = await page.$eval('${action.element}', el => el.innerHTML);
