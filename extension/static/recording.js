@@ -1,7 +1,10 @@
 // Handles logic for recording browser actions
 
 // Toggles the text on the Record Button to reflect the given Recording Status rec
-const recordButtonUpdate = (rec) => btnRecord.innerText = rec ? 'Stop Recording' : 'Record';
+const recordButtonUpdate = (rec) => {
+  btnSnapshot.disabled = !rec;
+  btnRecord.innerText = rec ? 'Stop Recording' : 'Record';
+}
 
 
 // This sets the Record Button to have the correct message on startup
@@ -40,7 +43,7 @@ function toggleListeners(rec) {
 
   //Helper Function to return a Selector Path to the given element
   function getSelectorPath(element) {
-    // TODO: This function is copied verbatim from elsewhere.
+    // TODO: This function is copied verbatim in two place.
     // This is not DRY.
     // Maybe a static method on a Class?
 
@@ -75,7 +78,7 @@ function toggleListeners(rec) {
     // as this may be a desired thing to test for
     e.preventDefault();
 
-    chrome.runtime.sendMessage({type: 'recordAction', object: {type: 'click', element: getSelectorPath(e.target)}});
+    chrome.runtime.sendMessage({type: 'recordAction', action: {type: 'click', element: getSelectorPath(e.target)}});
   }
 
   
