@@ -1,4 +1,3 @@
-import * as Util from './Util.js';
 import * as boilerplate from './boilerplate.js';
 
 // Initialize on Start

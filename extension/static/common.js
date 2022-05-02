@@ -1,5 +1,3 @@
-console.log('Hello world')
-
 // Helper Function to return a Selector Path to the given element
 function getSelectorPath(element) {
   /// trying to modularize out getSelectorPath

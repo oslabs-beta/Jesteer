@@ -1,4 +1,5 @@
 // Javascript Components for the popup page when the extension icon is clicked
+// import Util from '../src/Util'
 
 btnSnapshot.addEventListener('click', async () => {
   // Get activeTab
@@ -6,8 +7,11 @@ btnSnapshot.addEventListener('click', async () => {
 
   chrome.scripting.executeScript({
     target: {tabId: tab.id},
-    files: ['static/gsp.js']
+    files: ['static/common.js']
   });
+
+  // importScripts('src/Util.js');
+
   // Execute the 'snapshot' function in the context of the current webpage
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
