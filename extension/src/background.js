@@ -15,14 +15,18 @@ chrome.runtime.onStartup.addListener(() => {
 })
 
 // Listen for messages sent from elsewhere across the extension
-chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener( function(message, sender, sendResponse) {
 
-  // handle requests based on their type
-  switch (request.type) {
-    // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' request
+  // handle messages based on their type
+  switch (message.type) {
+    // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
     case 'recordAction':
+      // bug-fix: when we take a snapshot, both a 'click' and a 'snapshot' action get registered.
+      // We need to make sure only the snapshot action is registered, so we pop off the click.
+      if (message.action.type === 'snapshot') actions.pop(); 
+
       // Push the action object from the message into the actions array
-      actions.push(request.object);
+      actions.push(message.action);
       sendResponse({ok: true});
       break;
 
@@ -39,21 +43,38 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
       `
       const promises = [];
       promises.push(targetPage.waitForNavigation());
-      await targetPage.goto('${request.url}');
+      await targetPage.goto('${message.url}');
       await Promise.all(promises);
       
       `;
 
-      /*
-      Action Example: {
-        type: 'click',
-        element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
-      }
-      */
+      // Action Example: {
+      //   type: 'click',
+      //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
+      // }
+      console.log(actions);
       for (let action of actions) {
-        str += `const element = await page.waitForSelector('${action.element}');\n`;
-        str += `await scrollIntoViewIfNeeded(element, timeout);\n`;
-        str += `await element.click();\n\n`;
+        console.log(action)
+        switch (action.type) {
+          case 'click':
+            str += `const element = await page.waitForSelector('${action.element}');\n`;
+            str += `await scrollIntoViewIfNeeded(element, timeout);\n`;
+            str += `await element.click();\n\n`;
+            break;
+          
+          case 'snapshot':
+            str +=
+              `
+              const snapped = await page.$eval('${action.element}', el => el.innerHTML);
+              expect(snapped).toMatchSnapshot();
+              `
+            break;
+
+          default:
+            console.log('ERROR: Unknown action', action);
+            sendResponse({ok: false});
+            return;
+        }
       }
 
       str += boilerplate.blockEnd;
@@ -67,14 +88,14 @@ chrome.runtime.onMessage.addListener( function(request, sender, sendResponse) {
 
     // Log something to the Service Worker Console
     case 'log':
-      console.log(request.message);
+      console.log(message.message);
       sendResponse({ok: true});
       break;
 
     // Download Snapshot
     case 'download':
       chrome.downloads.download({
-        url: request.url,
+        url: message.url,
         filename: 'snapshot.js'
       },
       downloadId => {
