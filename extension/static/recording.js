@@ -16,6 +16,12 @@ btnRecord.addEventListener('click', async () => {
   //Get activeTab
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+  // Insert code for functions shared across popup
+  chrome.scripting.executeScript({
+    target: {tabId: tab.id},
+    files: ['static/common.js']
+  });
+
   // Get the current recording state
   let { recording } = await chrome.storage.local.get({ recording: false });
   // Toggle recording status (false -> true / true -> false)

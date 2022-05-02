@@ -1,4 +1,4 @@
-// Helper Function to return a Selector Path to the given element
+// Return a Selector Path to the given element
 function getSelectorPath(element) {
 
   const names = [];

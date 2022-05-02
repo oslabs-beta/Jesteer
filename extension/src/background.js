@@ -23,6 +23,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // handle a keypress (store in keysPressed variable)
     case 'keydown':
       keysPressed += message.key;
+      sendResponse({ok: true});
       break;
 
     // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
@@ -65,9 +66,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       //   type: 'click',
       //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
       // }
-      console.log(actions);
       for (let action of actions) {
-        console.log(action)
 
         switch (action.type) {
           case 'keyboard':
