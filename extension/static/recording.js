@@ -40,7 +40,7 @@ function toggleListeners(rec) {
 
   //Helper Function to return a Selector Path to the given element
   function getSelectorPath(element) {
-    // TODO: This function is copied verbatim from elsewhere.
+    // TODO: This function is copied verbatim in two place.
     // This is not DRY.
     // Maybe a static method on a Class?
 
@@ -75,7 +75,7 @@ function toggleListeners(rec) {
     // as this may be a desired thing to test for
     e.preventDefault();
 
-    chrome.runtime.sendMessage({type: 'recordAction', object: {type: 'click', element: getSelectorPath(e.target)}});
+    chrome.runtime.sendMessage({type: 'recordAction', action: {type: 'click', element: getSelectorPath(e.target)}});
   }
 
   
