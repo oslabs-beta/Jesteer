@@ -1,67 +1,135 @@
-import * as Util from './Util.js';
 import * as boilerplate from './boilerplate.js';
+import { toggleListeners } from '../static/toggleListeners.js';
 
 // Initialize on Start
 
 // current actions acts as a queue containing the actions performed on the page while recording,
 // including clicks and snapshots.
 let actions = [];
+let keysPressed = '';
 
 // initializes chrome storage on setup (?)
 // Initialize our state to reflect that we are not yet recording on extension startup
 chrome.runtime.onStartup.addListener(() => {
   // Set a value in the extension local storage
-  chrome.storage.local.set({recording: false});
+  console.log('onStartup event received.');
+  chrome.storage.local.set({ recording: false });
+})
+
+// testing
+chrome.webNavigation.onDOMContentLoaded.addListener(async (data) => {
+  console.log('onDOMContentLoaded event received in background.js');
+  console.log(data);
+  chrome.storage.local.get('recording', async ({ recording }) => {
+    if (recording) {
+      let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+      // below code was copied from recording.js
+      // Insert code for functions shared across popup
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['static/common.js']
+      });
+
+      // turn off existing event listeners
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        function: toggleListeners,
+        args: [false]
+      });
+
+      // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        function: toggleListeners,
+        args: [true]
+      });
+
+    }
+  })
+
 })
 
 // Listen for messages sent from elsewhere across the extension
-chrome.runtime.onMessage.addListener( function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
+  console.log('actions queue:', actions);
   // handle messages based on their type
   switch (message.type) {
+
+    // handle a keypress (store in keysPressed variable)
+    case 'keydown':
+      keysPressed += message.key;
+      sendResponse({ ok: true });
+      break;
+
     // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
     case 'recordAction':
+
+      // check if a message was just typed in
+      if (keysPressed) {
+        actions.push({ type: 'keyboard', text: keysPressed });
+        keysPressed = '';
+      }
+
       // bug-fix: when we take a snapshot, both a 'click' and a 'snapshot' action get registered.
       // We need to make sure only the snapshot action is registered, so we pop off the click.
-      if (message.action.type === 'snapshot') actions.pop(); 
+      if (message.action.type === 'snapshot') actions.pop();
 
       // Push the action object from the message into the actions array
       actions.push(message.action);
-      sendResponse({ok: true});
+      sendResponse({ ok: true });
       break;
 
     // user clicks the 'stop recording button'
     case 'stopRecording': { // TODO: Ideally most of this functionality would live inside a function which we would call here
       // Compile the final file for output
+      console.log('stopping recording...');
 
       // let str = `import puppeteer from 'puppeteer';\n`;
       let str = boilerplate.testSuiteIntro;
       str += boilerplate.describeStart;
       str += boilerplate.itBlockStart;
 
-      str += 
-      `
+      str +=
+        `
       const promises = [];
       promises.push(targetPage.waitForNavigation());
       await targetPage.goto('${message.url}');
       await Promise.all(promises);
-      
       `;
 
       // Action Example: {
       //   type: 'click',
       //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
       // }
-      console.log(actions);
+      // console.log('actions queue at the end:', actions);
       for (let action of actions) {
-        console.log(action)
         switch (action.type) {
-          case 'click':
-            str += `const element = await page.waitForSelector('${action.element}');\n`;
-            str += `await scrollIntoViewIfNeeded(element, timeout);\n`;
-            str += `await element.click();\n\n`;
+          case 'keyboard':
+            str +=
+              `
+            await page.keyboard.type('${action.text}');
+            `;
             break;
-          
+
+          case 'click':
+            str +=
+              `
+              const element = await page.waitForSelector('${action.element}');
+              await scrollIntoViewIfNeeded(element, timeout);
+              await element.click();
+              `;
+
+            // handle <a> tags and navigation
+            if (action.clickedLiveLink) {
+              str +=
+                `
+                await page.waitForNavigation();
+                `
+            }
+            break;
+
           case 'snapshot':
             str +=
               `
@@ -72,7 +140,7 @@ chrome.runtime.onMessage.addListener( function(message, sender, sendResponse) {
 
           default:
             console.log('ERROR: Unknown action', action);
-            sendResponse({ok: false});
+            sendResponse({ ok: false });
             return;
         }
       }
@@ -83,13 +151,13 @@ chrome.runtime.onMessage.addListener( function(message, sender, sendResponse) {
       console.log(str);
 
       actions = [];
-      sendResponse({ok: true});
+      sendResponse({ ok: true });
     } break;
 
     // Log something to the Service Worker Console
     case 'log':
       console.log(message.message);
-      sendResponse({ok: true});
+      sendResponse({ ok: true });
       break;
 
     // Download Snapshot
@@ -98,28 +166,32 @@ chrome.runtime.onMessage.addListener( function(message, sender, sendResponse) {
         url: message.url,
         filename: 'snapshot.js'
       },
-      downloadId => {
-        chrome.downloads.show(downloadId);
-        console.log('ERROR?', chrome.runtime.lastError);
-      });
-    
-      sendResponse({ok: true});
+        downloadId => {
+          chrome.downloads.show(downloadId);
+          console.log('ERROR?', chrome.runtime.lastError);
+        });
+
+      sendResponse({ ok: true });
       break;
 
     // Received unknown message
     default:
       console.log('Received Unknown Message')
-      sendResponse({ok: false});
+      sendResponse({ ok: false });
       break;
   }
 });
 
 // Abort recording on tab changed
-const stopRecording = () => {
+// const stopRecording = async () => {
+  // const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  // chrome.tabs.sendMessage(tab.id, { type: 'navigation' });
+
   // This logic will eventually need to be more sophisticated
   // TODO: Consider saving the existing recording for picking up where it was left off
 
-  chrome.storage.local.set({recording: false});
-};
-chrome.tabs.onUpdated.addListener(stopRecording);
-chrome.tabs.onActivated.addListener(stopRecording);
+//   chrome.storage.local.set({ recording: false });
+//   // chrome.runtime.sendMessage({ type: 'navigation' });
+// };
+// chrome.tabs.onUpdated.addListener(stopRecording);
+// chrome.tabs.onActivated.addListener(stopRecording);

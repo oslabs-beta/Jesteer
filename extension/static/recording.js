@@ -1,4 +1,5 @@
 // Handles logic for recording browser actions
+import { toggleListeners } from './toggleListeners.js';
 
 // Toggles the text on the Record Button to reflect the given Recording Status rec
 const recordButtonUpdate = (rec) => {
@@ -6,18 +7,25 @@ const recordButtonUpdate = (rec) => {
   btnRecord.innerText = rec ? 'Stop Recording' : 'Record';
 }
 
-
 // This sets the Record Button to have the correct message on startup
-chrome.storage.local.get('recording', ({recording}) => {
+chrome.storage.local.get('recording', ({ recording }) => {
   recordButtonUpdate(recording);
 });
 
+// handle clicking the record button
 btnRecord.addEventListener('click', async () => {
+  console.log('can you read this? (recording.js)');
   //Get activeTab
-  let [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  // Insert code for functions shared across popup
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ['static/common.js']
+  });
 
   // Get the current recording state
-  let {recording} = await chrome.storage.local.get({recording: false});
+  let { recording } = await chrome.storage.local.get({ recording: false });
   // Toggle recording status (false -> true / true -> false)
   recording = !recording;
 
@@ -25,11 +33,17 @@ btnRecord.addEventListener('click', async () => {
   recordButtonUpdate(recording);
 
   // Set the new value in storage
-  chrome.storage.local.set({recording});
-  
+  await chrome.storage.local.set({ recording });
+
+  console.log('value of recording', recording);
+  if (!recording) {
+    await chrome.runtime.sendMessage({ type: 'log', message: 'attempt to stop recording from recording.js' });
+    await chrome.runtime.sendMessage({ type: 'stopRecording', url: window.location.href });
+  }
+
   // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
-  chrome.scripting.executeScript({
-    target: {tabId: tab.id},
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
     function: toggleListeners,
     args: [recording]
   });
@@ -37,58 +51,3 @@ btnRecord.addEventListener('click', async () => {
   // Dismiss the popup
   window.close();
 });
-
-// Enables and Disables the Event Listeners that monitor the webpage
-function toggleListeners(rec) {
-
-  //Helper Function to return a Selector Path to the given element
-  function getSelectorPath(element) {
-    // TODO: This function is copied verbatim in two place.
-    // This is not DRY.
-    // Maybe a static method on a Class?
-
-    const names = [];
-
-    while (element.parentNode) {
-      if (element.id) {
-        names.unshift('#' + element.id);
-        break;
-      } 
-      else {
-        if (element === element.ownerDocument.documentElement) names.unshift(element.tagName);
-        else {
-          let e = element;
-          let i = 1;
-          while (e.previousElementSibling) {
-            e = e.previousElementSibling;
-            i++;
-          }
-          names.unshift(`${ element.tagName }:nth-child(${ i })`);
-        }
-      }
-      element = element.parentNode;
-    }
-    return names.join(' > ');
-  }
-
-  // When an element in the current webpage is clicked, send a message back to the chrome extension
-  // From there in can be added to the recorded actions
-  const handleClick = e => {
-    // TODO: Remove this line. This prevent for example hyperlinks from redirecting you elsewhere
-    // as this may be a desired thing to test for
-    e.preventDefault();
-
-    chrome.runtime.sendMessage({type: 'recordAction', action: {type: 'click', element: getSelectorPath(e.target)}});
-  }
-
-  
-  if (rec) {
-    // When we begin recording, inject our event listener(s)
-    document.___jesteer = {}; // Container object which holds functionality we injected
-    document.addEventListener('click', document.___jesteer.handleClick = function fn(e) {handleClick(e)});
-  } else {
-    // When we stop recording, remove them
-    document.removeEventListener('click', document.___jesteer.handleClick);
-    chrome.runtime.sendMessage({type: 'stopRecording', url: window.location.href});
-  }
-}

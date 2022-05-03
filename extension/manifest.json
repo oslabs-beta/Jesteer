@@ -3,22 +3,23 @@
   "description": "Imagine a world where tests write themselves",
   "version": "1.0",
   "manifest_version": 3,
-
   "background": {
     "service_worker": "src/background.js",
     "type": "module"
   },
-
   "permissions": [
     "storage",
     "activeTab",
+    "tabs",
     "scripting",
-    "downloads"
+    "downloads",
+    "webNavigation"
   ],
-
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "action": {
     "default_popup": "static/popup.html"
   },
-
   "options_page": "static/options.html"
 }
