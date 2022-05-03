@@ -19,7 +19,22 @@
     "<all_urls>"
   ],
   "action": {
-    "default_popup": "static/popup.html"
+    "default_popup": "static/popup.html",
+    "default_icon": {
+      "16": "/assets/logo/JesteerLogo_16px.png",
+      "32": "/assets/logo/JesteerLogo_32px.png",
+      "48": "/assets/logo/JesteerLogo_48px.png",
+      "64": "/assets/logo/JesteerLogo_64px.png",
+      "128": "/assets/logo/JesteerLogo_128px.png"
+    }
   },
+  "icons": {
+    "16": "/assets/logo/JesteerLogo_16px.png",
+    "32": "/assets/logo/JesteerLogo_32px.png",
+    "48": "/assets/logo/JesteerLogo_48px.png",
+    "64": "/assets/logo/JesteerLogo_64px.png",
+    "128": "/assets/logo/JesteerLogo_128px.png"
+  },
+
   "options_page": "static/options.html"
 }
