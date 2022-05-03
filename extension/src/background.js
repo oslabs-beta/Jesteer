@@ -1,4 +1,5 @@
 import * as boilerplate from './boilerplate.js';
+import { toggleListeners } from '../static/toggleListeners.js';
 
 // Initialize on Start
 
@@ -11,12 +12,48 @@ let keysPressed = '';
 // Initialize our state to reflect that we are not yet recording on extension startup
 chrome.runtime.onStartup.addListener(() => {
   // Set a value in the extension local storage
+  console.log('onStartup event received.');
   chrome.storage.local.set({ recording: false });
+})
+
+// testing
+chrome.webNavigation.onDOMContentLoaded.addListener(async (data) => {
+  console.log('onDOMContentLoaded event received in background.js');
+  console.log(data);
+  chrome.storage.local.get('recording', async ({ recording }) => {
+    if (recording) {
+      let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+      // below code was copied from recording.js
+      // Insert code for functions shared across popup
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['static/common.js']
+      });
+
+      // turn off existing event listeners
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        function: toggleListeners,
+        args: [false]
+      });
+
+      // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        function: toggleListeners,
+        args: [true]
+      });
+
+    }
+  })
+
 })
 
 // Listen for messages sent from elsewhere across the extension
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
+  console.log('actions queue:', actions);
   // handle messages based on their type
   switch (message.type) {
 
@@ -47,6 +84,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // user clicks the 'stop recording button'
     case 'stopRecording': { // TODO: Ideally most of this functionality would live inside a function which we would call here
       // Compile the final file for output
+      console.log('stopping recording...');
 
       // let str = `import puppeteer from 'puppeteer';\n`;
       let str = boilerplate.testSuiteIntro;
@@ -65,6 +103,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       //   type: 'click',
       //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
       // }
+      // console.log('actions queue at the end:', actions);
       for (let action of actions) {
         switch (action.type) {
           case 'keyboard':
@@ -81,6 +120,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
               await scrollIntoViewIfNeeded(element, timeout);
               await element.click();
               `;
+
+            // handle <a> tags and navigation
+            if (action.clickedLiveLink) {
+              str +=
+                `
+                await page.waitForNavigation();
+                `
+            }
             break;
 
           case 'snapshot':
@@ -136,11 +183,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 // Abort recording on tab changed
-const stopRecording = () => {
+// const stopRecording = async () => {
+  // const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  // chrome.tabs.sendMessage(tab.id, { type: 'navigation' });
+
   // This logic will eventually need to be more sophisticated
   // TODO: Consider saving the existing recording for picking up where it was left off
 
-  chrome.storage.local.set({ recording: false });
-};
-chrome.tabs.onUpdated.addListener(stopRecording);
-chrome.tabs.onActivated.addListener(stopRecording);
+//   chrome.storage.local.set({ recording: false });
+//   // chrome.runtime.sendMessage({ type: 'navigation' });
+// };
+// chrome.tabs.onUpdated.addListener(stopRecording);
+// chrome.tabs.onActivated.addListener(stopRecording);

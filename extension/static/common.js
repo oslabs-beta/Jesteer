@@ -18,7 +18,7 @@ function getSelectorPath(element) {
           e = e.previousElementSibling;
           i++;
         }
-        names.unshift(`${ element.tagName }:nth-child(${ i })`);
+        names.unshift(`${element.tagName}:nth-child(${i})`);
       }
     }
     element = element.parentNode;
