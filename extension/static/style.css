@@ -1,16 +1,96 @@
-/* Boilerplate Style for Popup.html fromn tutorial */
-/* Currently disabled */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
-button {
-  height: 30px;
-  width: 30px;
-  outline: none;
-  margin: 10px;
-  border: none;
-  border-radius: 2px;
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: 'Inter';
 }
 
-button.current {
-  box-shadow: 0 0 0 2px white,
-              0 0 0 4px black;
+html,
+body {
+  position: relative;
+  width: 280px;
+  /* height: 70px; */
+}
+
+body {
+  border: 1px solid black;
+  background-color: #F8F8F8;
+}
+
+a {
+  color: rgb(0, 100, 200);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: rgb(0, 80, 160);
+}
+
+.title {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid black;
+  background-color: white;
+}
+
+.title h1 {
+  font-size: 16px;
+}
+
+.title svg {
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 5px;
+  box-shadow: 0px 4px 4px 0px #00000040;
+  border: 1px solid black;
+  font-size: 12px;
+  background-color: white;
+  width: 240px;
+  margin: 1em auto;
+}
+
+.action-button:hover {
+  opacity: 80%;
+}
+
+.button-icon {
+  width: 26px;
+  height: 24px;
+  border-right: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-name {
+  margin: 0 auto;
+}
+
+#codegen-container {
+  display: flex;
+  justify-content: center;
+}
+
+#codegen {
+  height: 300px;
+  width: 240px;
+  resize: none;
+  margin-bottom: 10px;
+  font-family: monospace;
+  border: 1px solid black;
+  border-radius: 3px;
 }
