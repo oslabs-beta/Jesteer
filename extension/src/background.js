@@ -1,4 +1,4 @@
-import * as boilerplate from './boilerplate.js';
+import * as templates from './templates.js';
 import { toggleListeners } from '../static/toggleListeners.js';
 
 // Initialize on Start
@@ -57,6 +57,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   // handle messages based on their type
   switch (message.type) {
 
+    // BUG: keydown will return the incorrect keycode for lowercase letter
+    // https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event
     // handle a keypress (store in keysPressed variable)
     case 'keydown':
       keysPressed += message.key;
@@ -65,7 +67,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
     case 'recordAction':
-
       // check if a message was just typed in
       if (keysPressed) {
         actions.push({ type: 'keyboard', text: keysPressed });
@@ -87,55 +88,32 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       console.log('stopping recording...');
 
       // let str = `import puppeteer from 'puppeteer';\n`;
-      let str = boilerplate.testSuiteIntro;
-      str += boilerplate.describeStart;
-      str += boilerplate.itBlockStart;
+      let str = templates.testSuiteStart;
+      str += templates.describeStart;
+      str += templates.itBlockStart;
 
-      str +=
-        `
-      const promises = [];
-      promises.push(targetPage.waitForNavigation());
-      await targetPage.goto('${message.url}');
-      await Promise.all(promises);
-      `;
+
+      str += templates.gotoInitialPage(message.url);
 
       // Action Example: {
       //   type: 'click',
       //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
       // }
-      // console.log('actions queue at the end:', actions);
       for (let action of actions) {
         switch (action.type) {
           case 'keyboard':
-            str +=
-              `
-            await page.keyboard.type('${action.text}');
-            `;
+            str += templates.keyboard(action.text);
             break;
 
           case 'click':
-            str +=
-              `
-              const element = await page.waitForSelector('${action.element}');
-              await scrollIntoViewIfNeeded(element, timeout);
-              await element.click();
-              `;
+            str += templates.click(action.element);
 
             // handle <a> tags and navigation
-            if (action.clickedLiveLink) {
-              str +=
-                `
-                await page.waitForNavigation();
-                `
-            }
+            if (action.clickedLiveLink) str += templates.waitForNav;
             break;
 
           case 'snapshot':
-            str +=
-              `
-              const snapped = await page.$eval('${action.element}', el => el.innerHTML);
-              expect(snapped).toMatchSnapshot();
-              `
+            str += templates.snapshot();
             break;
 
           default:
@@ -145,8 +123,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         }
       }
 
-      str += boilerplate.blockEnd;
-      str += boilerplate.blockEnd;
+      str += templates.blockEndMultiple(2);
 
       console.log(str);
 
@@ -156,7 +133,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     // Log something to the Service Worker Console
     case 'log':
-      console.log(message.message);
+      console.log(message.text);
       sendResponse({ ok: true });
       break;
 
@@ -168,7 +145,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       },
         downloadId => {
           chrome.downloads.show(downloadId);
-          console.log('ERROR?', chrome.runtime.lastError);
+          if (chrome.runtime.lastError) console.log('ERROR', chrome.runtime.lastError);
         });
 
       sendResponse({ ok: true });

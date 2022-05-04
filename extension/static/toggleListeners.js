@@ -5,7 +5,14 @@ export function toggleListeners(rec) {
   // When an element in the current webpage is clicked, send a message back to the chrome extension
   // From there in can be added to the recorded actions
   const handleClick = e => {
-    const recordActionMessage = { type: 'recordAction', action: { type: 'click', element: getSelectorPath(e.target) } };
+    const recordActionMessage = {
+      type: 'recordAction',
+      action: {
+        type: 'click',
+        element: getSelectorPath(e.target)
+      }
+    };
+
     // handle links
     // todo: what if the link opens a new tab?
     if (e.target.localName === 'a' && e.target.href && e.target.href !== '#') {
