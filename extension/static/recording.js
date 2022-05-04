@@ -36,9 +36,12 @@ btnRecord.addEventListener('click', async () => {
   await chrome.storage.local.set({ recording });
 
   console.log('value of recording', recording);
-  if (!recording) {
+  if (recording) {
+    await chrome.runtime.sendMessage({ type: 'log', text: 'URL: ' + tab.url });
+    await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'start', url: tab.url } });
+  } else {
     await chrome.runtime.sendMessage({ type: 'log', text: 'attempt to stop recording from recording.js' });
-    await chrome.runtime.sendMessage({ type: 'stopRecording', url: tab.url });
+    await chrome.runtime.sendMessage({ type: 'stopRecording'});
   }
 
   // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage

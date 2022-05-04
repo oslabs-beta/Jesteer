@@ -83,37 +83,41 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       break;
 
     // user clicks the 'stop recording button'
-    case 'stopRecording': { // TODO: Ideally most of this functionality would live inside a function which we would call here
+    case 'stopRecording': {
       // Compile the final file for output
       console.log('stopping recording...');
-
-      // let str = `import puppeteer from 'puppeteer';\n`;
-      let str = templates.testSuiteStart;
-      str += templates.describeStart;
-      str += templates.itBlockStart;
-
-
-      str += templates.gotoInitialPage(message.url);
 
       // Action Example: {
       //   type: 'click',
       //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
       // }
+
+      let outputString = '';
+
       for (let action of actions) {
         switch (action.type) {
+          case 'start':
+            outputString += (
+              templates.testSuiteStart
+              + templates.describeStart
+              + templates.itBlockStart
+              + templates.gotoInitialPage(action.url)
+              );
+            break;
+
           case 'keyboard':
-            str += templates.keyboard(action.text);
+            outputString += templates.keyboard(action.text);
             break;
 
           case 'click':
-            str += templates.click(action.element);
+            outputString += templates.click(action.element);
 
             // handle <a> tags and navigation
-            if (action.clickedLiveLink) str += templates.waitForNav;
+            if (action.clickedLiveLink) outputString += templates.waitForNav;
             break;
 
           case 'snapshot':
-            str += templates.snapshot();
+            outputString += templates.snapshot();
             break;
 
           default:
@@ -123,9 +127,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         }
       }
 
-      str += templates.blockEndMultiple(2);
+      outputString += templates.blockEndMultiple(2);
 
-      console.log(str);
+      console.log(outputString);
 
       actions = [];
       sendResponse({ ok: true });
