@@ -18,9 +18,6 @@
   "host_permissions": [
     "<all_urls>"
   ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
-  },
   "action": {
     "default_popup": "static/popup.html",
     "default_icon": {
