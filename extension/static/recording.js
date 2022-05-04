@@ -4,7 +4,7 @@ import { toggleListeners } from './toggleListeners.js';
 // Toggles the text on the Record Button to reflect the given Recording Status rec
 const recordButtonUpdate = (rec) => {
   btnSnapshot.disabled = !rec;
-  btnRecord.innerText = rec ? 'Stop Recording' : 'Record';
+  btnRecordValue.innerText = rec ? 'Stop Recording' : 'Record';
 }
 
 // This sets the Record Button to have the correct message on startup
