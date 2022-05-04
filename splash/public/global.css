@@ -7,23 +7,15 @@
 }
 
 html, body {
+	scroll-behavior: smooth;
 	box-sizing: border-box;
 	font-size: 62.5%;
 }
 
 body {
-	color: #333;
+	color: #000;
 	font-size: 2rem;
-	background-image: linear-gradient(rgba(204, 0, 0, 0.4), rgba(0, 174, 142, 0.4), rgba(0, 146, 58, 0.4));
-}
-
-body:after {
-	content: "";
-	background-image: url("./img/dark-denim-3.png");
-	height: 100%;
-	width: 100%;
-	opacity: 1;
-
+	background-image: linear-gradient(rgba(204, 0, 0, 0.4), rgba(0, 174, 142, 0.4), rgba(0, 146, 58, 0.4)), url("./img/noise-lines.png");
 }
 
 .container {
@@ -33,6 +25,6 @@ body:after {
 }
 
 a {
-	color: #333;
+	color: #000;
 	text-decoration: none;
 }
