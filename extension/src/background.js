@@ -132,7 +132,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       console.log(outputString);
 
       actions = [];
-      sendResponse({ ok: true });
+      sendResponse({ ok: true, output: outputString });
     } break;
 
     // Log something to the Service Worker Console

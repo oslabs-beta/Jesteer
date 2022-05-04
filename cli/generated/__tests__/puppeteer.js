@@ -11,24 +11,24 @@ describe('', () => {
   let browser, page, timeout;
 
   beforeAll(async () => {
+    jest.setTimeout(15000);
     browser = await puppeteer.launch({
       headless: true,
     });
-    jest.setTimeout(15000);
   });
 
   beforeEach(async () => {
     page = await browser.newPage();
-    timeout = 5000;
+    timeout = 10000;
     page.setDefaultTimeout(timeout);
   });
 
-  afterEach(() => {
-    page.close();
+  afterEach(async () => {
+    await page.close();
   });
 
-  afterAll(() => {
-    browser.close();
+  afterAll(async () => {
+    await browser.close();
   });
   
     test('https://nodejs.dev/learn/working-with-folders-in-nodejs', async () => {

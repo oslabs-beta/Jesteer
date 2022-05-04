@@ -39,9 +39,14 @@ btnRecord.addEventListener('click', async () => {
   if (recording) {
     await chrome.runtime.sendMessage({ type: 'log', text: 'URL: ' + tab.url });
     await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'start', url: tab.url } });
+
+    // Dismiss the popup
+    window.close();
   } else {
     await chrome.runtime.sendMessage({ type: 'log', text: 'attempt to stop recording from recording.js' });
-    await chrome.runtime.sendMessage({ type: 'stopRecording'});
+    const response = await chrome.runtime.sendMessage({ type: 'stopRecording'});
+
+    codegen.value = response.output;
   }
 
   // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
@@ -50,7 +55,4 @@ btnRecord.addEventListener('click', async () => {
     function: toggleListeners,
     args: [recording]
   });
-
-  // Dismiss the popup
-  window.close();
 });
