@@ -14,14 +14,16 @@ chrome.runtime.onStartup.addListener(() => {
   // Set a value in the extension local storage
   console.log('onStartup event received.');
   chrome.storage.local.set({ recording: false });
-})
+});
 
 // testing
 chrome.webNavigation.onDOMContentLoaded.addListener(async (data) => {
   console.log('onDOMContentLoaded event received in background.js');
   console.log(data);
+  // bug: if you type something in, press enter to navigate, and then end test, the text won't be picked up.
   chrome.storage.local.get('recording', async ({ recording }) => {
     if (recording) {
+
       let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
       // below code was copied from recording.js
@@ -44,10 +46,8 @@ chrome.webNavigation.onDOMContentLoaded.addListener(async (data) => {
         function: toggleListeners,
         args: [true]
       });
-
     }
   })
-
 })
 
 // Listen for messages sent from elsewhere across the extension
@@ -102,7 +102,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
               + templates.describeStart
               + templates.itBlockStart
               + templates.gotoInitialPage(action.url)
-              );
+            );
             break;
 
           case 'keyboard':
@@ -113,7 +113,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             outputString += templates.click(action.element);
 
             // handle <a> tags and navigation
-            if (action.clickedLiveLink) outputString += templates.waitForNav;
+            // if (action.clickedLiveLink) outputString += templates.waitForNav;
+            break;
+
+          case 'navigation':
+            outputString += templates.waitForNav;
             break;
 
           case 'snapshot':

@@ -6,6 +6,7 @@
 */
 const puppeteer = require('puppeteer'); // v13.0.0 or later
 
+jest.setTimeout(10000);
 describe('', () => {
 
   let browser, page, timeout;
@@ -14,7 +15,6 @@ describe('', () => {
     browser = await puppeteer.launch({
       headless: true,
     });
-    jest.setTimeout(15000);
   });
 
   beforeEach(async () => {
@@ -23,30 +23,53 @@ describe('', () => {
     page.setDefaultTimeout(timeout);
   });
 
-  afterEach(() => {
-    page.close();
+  afterEach(async () => {
+    await page.close();
   });
 
-  afterAll(() => {
-    browser.close();
+  afterAll(async () => {
+    await browser.close();
   });
-  
-it('', async () => {
 
-{
-const promises = [];
-promises.push(page.waitForNavigation());
-await page.goto('https://en.wikipedia.org/wiki/Rip_Van_Winkle');
-await Promise.all(promises);
-}
+  it('', async () => {
 
-{
-const element = await page.waitForSelector('#mw-content-text > DIV:nth-child(1) > DIV:nth-child(2) > A:nth-child(1)');
-await element.click();
-}
+    {
+      const promises = [];
+      promises.push(page.waitForNavigation());
+      await page.goto('https://stackoverflow.com/questions/1772179/get-character-value-from-keycode-in-javascript-then-trim');
+      await Promise.all(promises);
+    }
 
-await page.waitForNavigation();
+    {
+      const element = await page.waitForSelector('#answer-23377822 > DIV:nth-child(1) > DIV:nth-child(2) > DIV:nth-child(1) > PRE:nth-child(5)');
+      await element.click();
+    }
 
-});
+    {
+      const element = await page.waitForSelector('#answer-23377822 > DIV:nth-child(1) > DIV:nth-child(2) > DIV:nth-child(1) > BLOCKQUOTE:nth-child(6) > P:nth-child(1) > EM:nth-child(2)');
+      await element.click();
+    }
+
+    {
+      const element = await page.waitForSelector('#answer-23377822 > DIV:nth-child(1) > DIV:nth-child(2) > DIV:nth-child(1) > H1:nth-child(12)');
+      await element.click();
+    }
+
+    {
+      const element = await page.waitForSelector('#search > DIV:nth-child(1) > INPUT:nth-child(1)');
+      await element.click();
+    }
+
+    await page.waitForNavigation();
+
+    await page.waitForNavigation();
+
+    await page.waitForNavigation();
+
+    await page.waitForNavigation();
+
+    await page.waitForNavigation();
+
+  });
 
 });
