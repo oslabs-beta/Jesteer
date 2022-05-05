@@ -65,6 +65,18 @@ a:visited {
 
 .action-button:hover {
   opacity: 80%;
+  background: rgba(0, 174, 142, 0.4);
+  font-weight: 600;
+}
+
+.action-button:active {
+  background: rgba(204, 0, 0, 0.4);
+  font-weight: 600;
+  box-shadow: 0px 0px 0px 0px;
+}
+
+button {
+  cursor: pointer;
 }
 
 .button-icon {
@@ -79,6 +91,7 @@ a:visited {
 .button-name {
   margin: 0 auto;
 }
+
 
 #codegen-container {
   display: flex;
