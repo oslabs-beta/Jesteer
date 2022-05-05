@@ -1,15 +1,11 @@
-export const testSuiteIntro =
-    `/* 
+/* 
   This test suite was created using JESTEER, a project developed by 
   Tim Ruszala, Katie Janzen, Clare Cerullo, and Charissa Ramirez.
 
   Learn more at https://github.com/oslabs-beta/Jesteer .
 */
 const puppeteer = require('puppeteer'); // v13.0.0 or later
-`
 
-export const describeStart = 
-`
 describe('', () => {
 
   let browser, page, timeout;
@@ -34,14 +30,23 @@ describe('', () => {
   afterAll(() => {
     browser.close();
   });
-  `;
+  
+it('', async () => {
 
-export const itBlockStart = 
-`
-it('', () => {
-`
+{
+const promises = [];
+promises.push(page.waitForNavigation());
+await page.goto('https://en.wikipedia.org/wiki/Rip_Van_Winkle');
+await Promise.all(promises);
+}
 
-export const blockEnd =
-  `
+{
+const element = await page.waitForSelector('#mw-content-text > DIV:nth-child(1) > DIV:nth-child(2) > A:nth-child(1)');
+await element.click();
+}
+
+await page.waitForNavigation();
+
 });
-`
+
+});
