@@ -44,9 +44,11 @@ btnRecord.addEventListener('click', async () => {
     window.close();
   } else {
     await chrome.runtime.sendMessage({ type: 'log', text: 'attempt to stop recording from recording.js' });
-    const response = await chrome.runtime.sendMessage({ type: 'stopRecording'});
+    const { output } = await chrome.runtime.sendMessage({ type: 'stopRecording'});
 
-    codegen.value = response.output;
+    codegen.value = output;
+
+    await chrome.storage.local.set({currentTest: output});
   }
 
   // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
