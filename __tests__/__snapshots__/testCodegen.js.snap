@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`  1`] = `"<p><strong>Market ID: </strong>0</p><p><strong>Location: </strong>Boise</p><p><strong>Cards: </strong>0</p><p><strong>% of total: </strong>0</p><div class=\\"flex\\"><button class=\\"addCard\\">+</button><button class=\\"deleteCard\\">-</button></div>"`;
