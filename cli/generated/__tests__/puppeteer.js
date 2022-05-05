@@ -101,12 +101,13 @@ describe('', () => {
         }, "dog");
       }
     }
-    {
-      const targetPage = page;
-      const element = await waitForSelectors([["#www-wikipedia-org"]], targetPage, { timeout, visible: true });
-      await scrollIntoViewIfNeeded(element, timeout);
-      await element.click({ offset: { x: 652, y: 415 } });
-    }
+    page.keyboard.press('Enter');
+    // {
+    //   const targetPage = page;
+    //   const element = await waitForSelectors([["#www-wikipedia-org"]], targetPage, { timeout, visible: true });
+    //   await scrollIntoViewIfNeeded(element, timeout);
+    //   await element.click({ offset: { x: 652, y: 415 } });
+    // }
     {
       const targetPage = page;
       const promises = [];

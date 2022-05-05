@@ -8,7 +8,22 @@ import { toggleListeners } from '../static/toggleListeners.js';
 let actions = [];
 let keysPressed = '';
 
-// initializes chrome storage on setup (?)
+function handleRecordAction(action) {
+  // check if a message was just typed in
+  if (keysPressed) {
+    actions.push({ type: 'keyboard', text: keysPressed });
+    keysPressed = '';
+  }
+
+  // bug-fix: when we take a snapshot, both a 'click' and a 'snapshot' action get registered.
+  // We need to make sure only the snapshot action is registered, so we pop off the click.
+  if (action.type === 'snapshot') actions.pop();
+
+  // Push the action object from the message into the actions array
+  actions.push(action);
+}
+
+// initializes chrome storage on setup
 // Initialize our state to reflect that we are not yet recording on extension startup
 chrome.runtime.onStartup.addListener(() => {
   // Set a value in the extension local storage
@@ -16,39 +31,41 @@ chrome.runtime.onStartup.addListener(() => {
   chrome.storage.local.set({ recording: false });
 });
 
-// testing
-chrome.webNavigation.onDOMContentLoaded.addListener(async (data) => {
-  console.log('onDOMContentLoaded event received in background.js');
-  console.log(data);
-  // bug: if you type something in, press enter to navigate, and then end test, the text won't be picked up.
-  chrome.storage.local.get('recording', async ({ recording }) => {
-    if (recording) {
+// Check for page navigation
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  // read changeInfo data to see if url changed
+  if (changeInfo.url) {
+    // do something here
+    console.log('Navigated to a new page. tabId:', tabId);
+    chrome.storage.local.get('recording', async ({ recording }) => {
+      if (recording) {
+        const navigationAction = { type: 'navigation' };
+        handleRecordAction(navigationAction);
 
-      let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        // below code was copied from recording.js
+        // Insert code for functions shared across popup
+        chrome.scripting.executeScript({
+          target: { tabId },
+          files: ['static/common.js']
+        });
 
-      // below code was copied from recording.js
-      // Insert code for functions shared across popup
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['static/common.js']
-      });
+        // turn off existing event listeners
+        chrome.scripting.executeScript({
+          target: { tabId },
+          function: toggleListeners,
+          args: [false]
+        });
 
-      // turn off existing event listeners
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: toggleListeners,
-        args: [false]
-      });
-
-      // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: toggleListeners,
-        args: [true]
-      });
-    }
-  })
-})
+        // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
+        chrome.scripting.executeScript({
+          target: { tabId },
+          function: toggleListeners,
+          args: [true]
+        });
+      }
+    });
+  }
+});
 
 // Listen for messages sent from elsewhere across the extension
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -61,24 +78,36 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event
     // handle a keypress (store in keysPressed variable)
     case 'keydown':
-      keysPressed += message.key;
+
+      switch (message.key) {
+        case ('Enter'):
+        case ('Shift'):
+        case ('Meta'):
+          break;
+
+        default:
+          keysPressed += message.key;
+          break;
+      }
       sendResponse({ ok: true });
       break;
 
     // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
     case 'recordAction':
-      // check if a message was just typed in
-      if (keysPressed) {
-        actions.push({ type: 'keyboard', text: keysPressed });
-        keysPressed = '';
-      }
 
-      // bug-fix: when we take a snapshot, both a 'click' and a 'snapshot' action get registered.
-      // We need to make sure only the snapshot action is registered, so we pop off the click.
-      if (message.action.type === 'snapshot') actions.pop();
+      handleRecordAction(message.action);
+      // // check if a message was just typed in
+      // if (keysPressed) {
+      //   actions.push({ type: 'keyboard', text: keysPressed });
+      //   keysPressed = '';
+      // }
 
-      // Push the action object from the message into the actions array
-      actions.push(message.action);
+      // // bug-fix: when we take a snapshot, both a 'click' and a 'snapshot' action get registered.
+      // // We need to make sure only the snapshot action is registered, so we pop off the click.
+      // if (message.action.type === 'snapshot') actions.pop();
+
+      // // Push the action object from the message into the actions array
+      // actions.push(message.action);
       sendResponse({ ok: true });
       break;
 
@@ -111,9 +140,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
           case 'click':
             outputString += templates.click(action.element);
-
-            // handle <a> tags and navigation
-            // if (action.clickedLiveLink) outputString += templates.waitForNav;
             break;
 
           case 'navigation':
@@ -121,7 +147,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             break;
 
           case 'snapshot':
-            outputString += templates.snapshot();
+            outputString += templates.snapshot(action.element);
             break;
 
           default:
@@ -166,17 +192,3 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       break;
   }
 });
-
-// Abort recording on tab changed
-// const stopRecording = async () => {
-  // const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  // chrome.tabs.sendMessage(tab.id, { type: 'navigation' });
-
-  // This logic will eventually need to be more sophisticated
-  // TODO: Consider saving the existing recording for picking up where it was left off
-
-//   chrome.storage.local.set({ recording: false });
-//   // chrome.runtime.sendMessage({ type: 'navigation' });
-// };
-// chrome.tabs.onUpdated.addListener(stopRecording);
-// chrome.tabs.onActivated.addListener(stopRecording);
