@@ -13,10 +13,6 @@ function prepareSnapshot() {
     deselect(e);
 
     const selectorPath = getSelectorPath(e.target); // 
-    // console.log('Element:');
-    // console.log(e.target);
-    // console.log('Selector Path:');
-    // console.log(selectorPath);
 
     const action = { type: 'snapshot', element: selectorPath };
     chrome.runtime.sendMessage({ type: 'recordAction', action });
