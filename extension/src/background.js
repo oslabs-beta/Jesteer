@@ -8,12 +8,16 @@ import { toggleListeners } from '../static/toggleListeners.js';
 let actions = [];
 let keysPressed = '';
 
-function handleRecordAction(action) {
-  // check if a message was just typed in
+function flushKeyBuffer() {
   if (keysPressed) {
     actions.push({ type: 'keyboard', text: keysPressed });
     keysPressed = '';
   }
+}
+
+function handleRecordAction(action) {
+  // adds a type action to the actions queue, with whatever had last been typed
+  flushKeyBuffer();
 
   // bug-fix: when we take a snapshot, both a 'click' and a 'snapshot' action get registered.
   // We need to make sure only the snapshot action is registered, so we pop off the click.
@@ -21,6 +25,7 @@ function handleRecordAction(action) {
 
   // Push the action object from the message into the actions array
   actions.push(action);
+  console.log('record action: ', action);
 }
 
 // initializes chrome storage on setup
@@ -69,7 +74,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 // Listen for messages sent from elsewhere across the extension
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-
   console.log('actions queue:', actions);
   // handle messages based on their type
   switch (message.type) {
@@ -78,11 +82,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event
     // handle a keypress (store in keysPressed variable)
     case 'keydown':
-
+      console.log('Keydown event: ' + message.key);
       switch (message.key) {
-        case ('Enter'):
         case ('Shift'):
         case ('Meta'):
+          break;
+        // test this for pressing backspace with empty string in keysPressed
+        case ('Backspace'):
+          if (keysPressed) { 
+            keysPressed = keysPressed.substring(0, keysPressed.length - 1);
+          }
+          break;
+        case ('Enter'):
+          handleRecordAction({ type: 'enter' });
           break;
 
         default:
@@ -136,6 +148,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
           case 'keyboard':
             outputString += templates.keyboard(action.text);
+            break;
+
+          case 'enter':
+            outputString += templates.pressEnter;
             break;
 
           case 'click':
