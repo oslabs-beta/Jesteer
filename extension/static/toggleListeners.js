@@ -25,18 +25,7 @@ export function toggleListeners(rec) {
 
   const handleKeydown = e => {
     let key = e.key;
-    switch (e.key) {
-      case 'Enter':
-        key = '\r';
-        break;
-      case 'Backspace':
-        key = '\b';
-        break;
-      case 'default':
-        key = e.key;
-        break;
-    }
-    chrome.runtime.sendMessage({ type: 'keydown', key });
+    chrome.runtime.sendMessage({ type: 'keydown', key});
   }
 
   // start recording

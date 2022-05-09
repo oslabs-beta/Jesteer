@@ -51,6 +51,11 @@ export const waitForNav =
 await page.waitForNavigation();
 `;
 
+export const pressEnter = 
+`
+await page.keyboard.press('Enter');
+`;
+
 export const blockEndMultiple = count => blockEnd.repeat(count);
 
 export const gotoInitialPage = initialPageURL => (`
@@ -64,6 +69,10 @@ await Promise.all(promises);
 
 export const keyboard = text => (`
 await page.keyboard.type('${text}');
+`);
+
+export const keyboardPress = key => (`
+await page.keyboard.press('${key}');
 `);
 
 export const click = selector => (`
