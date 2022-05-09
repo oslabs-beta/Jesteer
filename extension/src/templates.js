@@ -71,6 +71,10 @@ export const keyboard = text => (`
 await page.keyboard.type('${text}');
 `);
 
+export const keyboardPress = key => (`
+await page.keyboard.press('${key}');
+`);
+
 export const click = selector => (`
 {
 const element = await page.waitForSelector('${selector}');

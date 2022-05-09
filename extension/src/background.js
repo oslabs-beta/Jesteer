@@ -48,8 +48,12 @@ function processActionsQueue() {
         outputString += templates.keyboard(action.text);
         break;
 
-      case 'enter':
-        outputString += templates.pressEnter;
+      // case 'enter':
+      //   outputString += templates.pressEnter;
+      //   break;
+
+      case 'keyboardPress':
+        outputString += templates.keyboardPress(action.key);
         break;
 
       case 'click':
@@ -135,23 +139,30 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // handle a keypress (store in keysPressed variable)
     case 'keydown':
       console.log('Keydown event: ' + message.key);
-      switch (message.key) {
-        case ('Shift'):
-        case ('Meta'):
-          break;
-        // test this for pressing backspace with empty string in keysPressed
-        case ('Backspace'):
-          if (keysPressed) { 
-            keysPressed = keysPressed.substring(0, keysPressed.length - 1);
-          }
-          break;
-        case ('Enter'):
-          handleRecordAction({ type: 'enter' });
-          break;
-        default:
-          keysPressed += message.key;
-          break;
+
+      if (message.key.length > 1) {
+        handleRecordAction({type: 'keyboardPress', key: message.key})
+      } else {
+        if (message.key === `\\`) keysPressed += '\\\\'
+        else keysPressed += message.key;
       }
+      // switch (message.key) {
+      //   case ('Shift'):
+      //   case ('Meta'):
+      //     break;
+      //   // test this for pressing backspace with empty string in keysPressed
+      //   case ('Backspace'):
+      //     if (keysPressed) { 
+      //       keysPressed = keysPressed.substring(0, keysPressed.length - 1);
+      //     }
+      //     break;
+      //   case ('Enter'):
+      //     handleRecordAction({ type: 'enter' });
+      //     break;
+      //   default:
+      //     keysPressed += message.key;
+      //     break;
+      // }
       sendResponse({ ok: true });
       break;
 
