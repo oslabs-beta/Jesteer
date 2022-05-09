@@ -10,7 +10,7 @@
 html,
 body {
   position: relative;
-  width: 280px;
+  min-width: 280px;
   /* height: 70px; */
 }
 
@@ -100,7 +100,7 @@ button {
 
 #codegen {
   height: 300px;
-  width: 240px;
+  width: 800px;
   resize: none;
   margin-bottom: 10px;
   font-family: monospace;

@@ -28,6 +28,58 @@ function handleRecordAction(action) {
   console.log('record action: ', action);
 }
 
+// When we stop recording, we go through all actions in the actions queue and use them to
+// build out the test suite.
+function processActionsQueue() {
+  let outputString = '';
+
+  for (let action of actions) {
+    switch (action.type) {
+      case 'start':
+        outputString += (
+          templates.testSuiteStart
+          + templates.describeStart
+          + templates.itBlockStart
+          + templates.gotoInitialPage(action.url)
+        );
+        break;
+
+      case 'keyboard':
+        outputString += templates.keyboard(action.text);
+        break;
+
+      case 'enter':
+        outputString += templates.pressEnter;
+        break;
+
+      case 'click':
+        outputString += templates.click(action.element);
+        break;
+
+      case 'navigation':
+        outputString += templates.waitForNav;
+        break;
+
+      case 'snapshot':
+        outputString += templates.snapshot(action.element);
+        break;
+
+      default:
+        console.log('ERROR: Unknown action', action);
+        sendResponse({ ok: false });
+        return;
+    }
+  }
+
+  outputString += templates.blockEndMultiple(2);
+
+  console.log(outputString);
+  
+  actions = [];
+
+  return outputString;
+}
+
 // initializes chrome storage on setup
 // Initialize our state to reflect that we are not yet recording on extension startup
 chrome.runtime.onStartup.addListener(() => {
@@ -96,7 +148,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         case ('Enter'):
           handleRecordAction({ type: 'enter' });
           break;
-
         default:
           keysPressed += message.key;
           break;
@@ -106,20 +157,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
     case 'recordAction':
-
       handleRecordAction(message.action);
-      // // check if a message was just typed in
-      // if (keysPressed) {
-      //   actions.push({ type: 'keyboard', text: keysPressed });
-      //   keysPressed = '';
-      // }
-
-      // // bug-fix: when we take a snapshot, both a 'click' and a 'snapshot' action get registered.
-      // // We need to make sure only the snapshot action is registered, so we pop off the click.
-      // if (message.action.type === 'snapshot') actions.pop();
-
-      // // Push the action object from the message into the actions array
-      // actions.push(message.action);
       sendResponse({ ok: true });
       break;
 
@@ -128,56 +166,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       // Compile the final file for output
       console.log('stopping recording...');
 
-      // Action Example: {
-      //   type: 'click',
-      //   element: 'HTML > BODY:nth-child(2) > DIV:nth-child(1) > DIV:nth-child(1) > H1:nth-child(1)'
-      // }
+      flushKeyBuffer();
 
-      let outputString = '';
+      const outputString = processActionsQueue();
 
-      for (let action of actions) {
-        switch (action.type) {
-          case 'start':
-            outputString += (
-              templates.testSuiteStart
-              + templates.describeStart
-              + templates.itBlockStart
-              + templates.gotoInitialPage(action.url)
-            );
-            break;
-
-          case 'keyboard':
-            outputString += templates.keyboard(action.text);
-            break;
-
-          case 'enter':
-            outputString += templates.pressEnter;
-            break;
-
-          case 'click':
-            outputString += templates.click(action.element);
-            break;
-
-          case 'navigation':
-            outputString += templates.waitForNav;
-            break;
-
-          case 'snapshot':
-            outputString += templates.snapshot(action.element);
-            break;
-
-          default:
-            console.log('ERROR: Unknown action', action);
-            sendResponse({ ok: false });
-            return;
-        }
-      }
-
-      outputString += templates.blockEndMultiple(2);
-
-      console.log(outputString);
-
-      actions = [];
       sendResponse({ ok: true, output: outputString });
     } break;
 
