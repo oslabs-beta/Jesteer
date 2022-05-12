@@ -3,7 +3,8 @@
 const config = {
   verbose: true,
   testTimeout: 10000,
-  rootDir: 'e2e'
+  rootDir: 'e2e',
+  // coverage: true,
 };
 
 module.exports = config;

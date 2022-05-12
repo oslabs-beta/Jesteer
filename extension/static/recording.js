@@ -1,6 +1,10 @@
 // Handles logic for recording browser actions
 import { toggleListeners } from './toggleListeners.js';
 
+// options that help us decide which tab to act on, depending on whether we're testing or not
+const QUERY_TAB_OPTS = { currentWindow: true, active: true };
+const E2E_QUERY_TAB_OPTS = { currentWindow: true, active: false };
+
 // Toggles the text on the Record Button to reflect the given Recording Status rec
 const recordButtonUpdate = (rec) => {
   btnSnapshot.disabled = !rec;
@@ -14,10 +18,17 @@ chrome.storage.local.get('recording', ({ recording }) => {
 
 // handle clicking the record button
 btnRecord.addEventListener('click', async () => {
-  console.log('can you read this? (recording.js)');
-  //Get activeTab
-  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+  chrome.tabs.getCurrent(tab => {
+    const isRunningExtensionOnBrowserTab = !!tab;
+    const opts = isRunningExtensionOnBrowserTab ? E2E_QUERY_TAB_OPTS : QUERY_TAB_OPTS;
+    const tabIndex = isRunningExtensionOnBrowserTab ? 1 : 0;
+
+    chrome.tabs.query(opts, tabs => execute(tabs[tabIndex]));
+  });
+});
+
+async function execute(tab) {
   // Insert code for functions shared across popup
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -34,8 +45,6 @@ btnRecord.addEventListener('click', async () => {
 
   // Set the new value in storage
   await chrome.storage.local.set({ recording });
-
-  console.log('value of recording', recording);
   if (recording) {
     await chrome.runtime.sendMessage({ type: 'log', text: 'URL: ' + tab.url });
     await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'start', url: tab.url } });
@@ -57,4 +66,4 @@ btnRecord.addEventListener('click', async () => {
     function: toggleListeners,
     args: [recording]
   });
-});
+};
