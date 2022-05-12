@@ -38,7 +38,7 @@ btnRecord.addEventListener('click', async () => {
   console.log('value of recording', recording);
   if (recording) {
     await chrome.runtime.sendMessage({ type: 'log', text: 'URL: ' + tab.url });
-    await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'start', url: tab.url } });
+    await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'initialURL', url: tab.url } });
 
     // Dismiss the popup
     window.close();
