@@ -3,8 +3,10 @@
     "jest": "^28.0.3",
     "puppeteer": "^13.7.0"
   },
-  
   "scripts": {
-    "test": "MODE=test jest sampleTest.spec.js "
+    "test": "jest sampleTest.spec.js "
+  },
+  "devDependencies": {
+    "puppeteer-to-istanbul": "^1.4.0"
   }
 }
