@@ -16,7 +16,9 @@ async function bootstrap(options = {}) {
   });
 
   const appPage = await browser.newPage();
-  await appPage.goto(appUrl, { waitUntil: 'load' });
+  // const pages = await browser.pages();
+  // const appPage = pages[0];
+  await appPage.goto(appUrl, { waitUntil: 'networkidle2' });
 
   const targets = await browser.targets();
   const extensionTarget = targets.find(target => target.type() === 'service_worker');

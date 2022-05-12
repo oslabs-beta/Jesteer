@@ -8,3 +8,6 @@ const config = {
 };
 
 module.exports = config;
+module.exports = {
+  setupFiles: ["<rootDir>/.jest/setEnvVars.js"]
+}
