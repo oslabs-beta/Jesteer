@@ -9,6 +9,7 @@ let actions = [];
 let keysPressed = '';
 
 function flushKeyBuffer() {
+  console.log('flushKeyBuffer called, buffer was:', keysPressed);
   if (keysPressed) {
     actions.push({ type: 'keyboard', text: keysPressed });
     keysPressed = '';
@@ -16,6 +17,7 @@ function flushKeyBuffer() {
 }
 
 function handleRecordAction(action) {
+  console.log('handleRecordAction called, action was:', JSON.stringify(action));
   // adds a type action to the actions queue, with whatever had last been typed
   flushKeyBuffer();
 
@@ -25,7 +27,6 @@ function handleRecordAction(action) {
 
   // Push the action object from the message into the actions array
   actions.push(action);
-  console.log('record action: ', action);
 }
 
 // When we stop recording, we go through all actions in the actions queue and use them to
@@ -56,10 +57,6 @@ function processActionsQueue() {
         outputString += templates.keyboard(action.text);
         break;
 
-      // case 'enter':
-      //   outputString += templates.pressEnter;
-      //   break;
-
       case 'keyboardPress':
         outputString += templates.keyboardPress(action.key);
         break;
@@ -85,8 +82,8 @@ function processActionsQueue() {
 
   outputString += templates.blockEndMultiple(2);
 
-  console.log(outputString);
-  
+  console.log('outputString:', outputString);
+
   actions = [];
 
   return outputString;
@@ -138,39 +135,19 @@ chrome.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
 
 // Listen for messages sent from elsewhere across the extension
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  console.log('actions queue:', actions);
   // handle messages based on their type
   switch (message.type) {
 
-    // BUG: keydown will return the incorrect keycode for lowercase letter
-    // https://developer.mozilla.org/en-US/docs/Web/API/Document/keydown_event
-    // handle a keypress (store in keysPressed variable)
+    // handle a keypress
     case 'keydown':
       console.log('Keydown event: ' + message.key);
 
       if (message.key.length > 1) {
-        handleRecordAction({type: 'keyboardPress', key: message.key})
+        handleRecordAction({ type: 'keyboardPress', key: message.key })
       } else {
         if (message.key === `\\`) keysPressed += '\\\\'
         else keysPressed += message.key;
       }
-      // switch (message.key) {
-      //   case ('Shift'):
-      //   case ('Meta'):
-      //     break;
-      //   // test this for pressing backspace with empty string in keysPressed
-      //   case ('Backspace'):
-      //     if (keysPressed) { 
-      //       keysPressed = keysPressed.substring(0, keysPressed.length - 1);
-      //     }
-      //     break;
-      //   case ('Enter'):
-      //     handleRecordAction({ type: 'enter' });
-      //     break;
-      //   default:
-      //     keysPressed += message.key;
-      //     break;
-      // }
       sendResponse({ ok: true });
       break;
 
@@ -184,31 +161,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     case 'stopRecording': {
       // Compile the final file for output
       console.log('stopping recording...');
-
       flushKeyBuffer();
-
       const outputString = processActionsQueue();
-
       sendResponse({ ok: true, output: outputString });
     } break;
 
     // Log something to the Service Worker Console
     case 'log':
       console.log(message.text);
-      sendResponse({ ok: true });
-      break;
-
-    // Download Snapshot
-    case 'download':
-      chrome.downloads.download({
-        url: message.url,
-        filename: 'snapshot.js'
-      },
-        downloadId => {
-          chrome.downloads.show(downloadId);
-          if (chrome.runtime.lastError) console.log('ERROR', chrome.runtime.lastError);
-        });
-
       sendResponse({ ok: true });
       break;
 

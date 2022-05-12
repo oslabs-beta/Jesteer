@@ -14,7 +14,6 @@ describe('', () => {
   beforeAll(async () => {
     browser = await puppeteer.launch({
       headless: false,
-      slowMo: 60,
     });
   });
 
@@ -24,38 +23,33 @@ describe('', () => {
     page.setDefaultTimeout(timeout);
   });
 
-  afterEach(async () => {
-    await page.close();
-  });
+  // afterEach(async () => {
+  //   await page.close();
+  // });
 
-  afterAll(async () => {
-    await browser.close();
-  });
+  // afterAll(async () => {
+  //   await browser.close();
+  // });
 
   it('', async () => {
 
     {
       const promises = [];
       promises.push(page.waitForNavigation());
-      await page.goto('http://localhost:3000/');
+      await page.goto('https://www.google.com/?gws_rd=ssl');
       await Promise.all(promises);
     }
 
     {
-      const element = await page.waitForSelector('#new-location');
+      const element = await page.waitForSelector('HTML > BODY:nth-child(2) > DIV:nth-child(2) > DIV:nth-child(3) > FORM:nth-child(3) > DIV:nth-child(1) > DIV:nth-child(1) > DIV:nth-child(3) > DIV:nth-child(1) > DIV:nth-child(2) > INPUT:nth-child(3)');
       await element.click();
     }
 
-    await page.keyboard.type('Boise');
+    await page.keyboard.type('\\t\\r\\n\\s\\\\\\b\\\\\\\\sdfsdf\\');
 
     {
-      const element = await page.waitForSelector('#add-market');
+      const element = await page.waitForSelector('HTML > BODY:nth-child(2) > DIV:nth-child(2) > DIV:nth-child(2)');
       await element.click();
-    }
-
-    {
-      const snapped = await page.$eval('#app > DIV:nth-child(1) > DIV:nth-child(1) > DIV:nth-child(3) > DIV:nth-child(2) > DIV:nth-child(2) > DIV:nth-child(1)', el => el.innerHTML);
-      expect(snapped).toMatchSnapshot();
     }
 
   });
