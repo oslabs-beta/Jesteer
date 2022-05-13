@@ -50,5 +50,5 @@ btnSnapshot.addEventListener('click', async () => {
   });
 
   // Dismiss the popup
-  window.close();
+  // window.close();
 });
