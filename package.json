@@ -7,6 +7,9 @@
     "test": "jest sampleTest.spec.js "
   },
   "devDependencies": {
+    "eslint": "^8.15.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.26.0",
     "puppeteer-to-istanbul": "^1.4.0"
   }
 }

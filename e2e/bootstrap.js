@@ -1,5 +1,5 @@
 // file adapted from: https://tweak-extension.com/blog/complete-guide-test-chrome-extension-puppeteer/
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer');
 
 // launches browser to test our chrome extension, and gives us access to variables
 // which reference the browser, the app page, the extension page, and the extension url
@@ -9,9 +9,9 @@ async function bootstrap(options = {}) {
     headless: false,
     devtools,
     args: [
-      "--disable-extensions-except=./extension",
-      "--load-extension=./extension",
-      "--user-agent=PuppeteerAgent",
+      '--disable-extensions-except=./extension',
+      '--load-extension=./extension',
+      '--user-agent=PuppeteerAgent',
     ],
     ...(slowMo && { slowMo }),
   });
@@ -19,18 +19,18 @@ async function bootstrap(options = {}) {
   const appPage = await browser.newPage();
   // const pages = await browser.pages();
   // const appPage = pages[0];
-  await appPage.goto(appUrl, { waitUntil: "networkidle2" });
+  await appPage.goto(appUrl, { waitUntil: 'load' });
 
   const targets = await browser.targets();
   const extensionTarget = targets.find(
-    (target) => target.type() === "service_worker"
+    (target) => target.type() === 'service_worker',
   );
-  const partialExtensionUrl = extensionTarget._targetInfo.url || "";
-  const [, , extensionId] = partialExtensionUrl.split("/");
+  const partialExtensionUrl = extensionTarget._targetInfo.url || '';
+  const [, , extensionId] = partialExtensionUrl.split('/');
 
   const extPage = await browser.newPage();
   const extensionUrl = `chrome-extension://${extensionId}/static/popup.html`;
-  await extPage.goto(extensionUrl, { waitUntil: "load" });
+  await extPage.goto(extensionUrl, { waitUntil: 'load' });
 
   return {
     appPage,

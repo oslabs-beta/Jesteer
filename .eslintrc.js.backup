@@ -1,0 +1,22 @@
+module.exports = exports = {
+  extends: "airbnb",
+  root: true,
+  env: {
+    browser: true,
+    node: true,
+    jest: true,
+  },
+  // indent: ["error", "tab", { ignoredNodes: ["TemplateLiteral > *"] }],
+  rules: {
+    "arrow-parens": "off",
+    "consistent-return": "off",
+    "func-names": "off",
+    "no-console": "off",
+    quotes: [2, "single", { avoidEscape: true }],
+    radix: "off",
+    "react/button-has-type": "off",
+    "react/destructuring-assignment": "off",
+    "react/jsx-filename-extension": "off",
+    "react/prop-types": "off",
+  },
+};
