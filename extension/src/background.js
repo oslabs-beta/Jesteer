@@ -1,9 +1,7 @@
+/* eslint no-console: "off" */
+
 import * as templates from './templates.js';
 import { toggleListeners } from '../static/toggleListeners.js';
-
-// options that help us decide which tab to act on, depending on whether we're testing or not
-const QUERY_TAB_OPTS = { currentWindow: true, active: true };
-const E2E_QUERY_TAB_OPTS = { currentWindow: true, active: false };
 
 const testingStatus = (navigator.userAgent === 'PuppeteerAgent');
 console.log('TESTING:', testingStatus);
@@ -51,11 +49,11 @@ function processActionsQueue() {
   for (const action of actions) {
     switch (action.type) {
       case 'start':
-        outputString +=
-          templates.testSuiteStart +
-          templates.describeStart +
-          templates.itBlockStart +
-          templates.gotoInitialPage(action.url);
+        outputString
+          += templates.testSuiteStart
+          + templates.describeStart
+          + templates.itBlockStart
+          + templates.gotoInitialPage(action.url);
         break;
 
       case 'keyboard':
@@ -79,15 +77,13 @@ function processActionsQueue() {
         break;
 
       default:
-        console.log('ERROR: Unknown action', action);
-        sendResponse({ ok: false });
-        return;
+        /* eslint-disable-next-line */
+        console.warn('Unknown action received. (action ignored.) action:', JSON.stringify(action));
+        break;
     }
   }
 
   outputString += templates.blockEndMultiple(2);
-
-  console.log('outputString:', outputString);
 
   actions = [];
 
@@ -104,7 +100,7 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 // Check for page navigation
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener((tabId, changeInfo /* , tab */) => {
   // read changeInfo data to see if url changed
   if (changeInfo.url) {
     // do something here
@@ -128,7 +124,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
           args: [false],
         });
 
-        // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
         chrome.scripting.executeScript({
           target: { tabId },
           function: toggleListeners,
@@ -140,27 +135,27 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 });
 
 // Listen for messages sent from elsewhere across the extension
-chrome.runtime.onMessage.addListener(function (
-  message,
-  sender,
-  sendResponse
-) {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // handle messages based on their type
   switch (message.type) {
     // handle a keypress
     case 'keydown':
-      console.log('Keydown event: ' + message.key);
+      console.log(`Keydown event: ${message.key}`);
 
       if (message.key.length > 1) {
         handleRecordAction({ type: 'keyboardPress', key: message.key });
-      } else {
-        if (message.key === '\\') keysPressed += '\\\\';
-        else keysPressed += message.key;
+      }
+      else if (message.key === '\\') {
+        keysPressed += '\\\\';
+      }
+      else {
+        keysPressed += message.key;
       }
       sendResponse({ ok: true });
       break;
 
-    // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
+    // when the user interacts with the webpage, whatever they interact with
+    // is emitted as a 'recordAction' message
     case 'recordAction':
       handleRecordAction(message.action);
       sendResponse({ ok: true });

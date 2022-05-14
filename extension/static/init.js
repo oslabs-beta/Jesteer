@@ -2,9 +2,8 @@
 const QUERY_TAB_OPTS = { currentWindow: true, active: true };
 const E2E_QUERY_TAB_OPTS = { currentWindow: true, active: false };
 
-
 // set variables which let us know whether
-chrome.tabs.getCurrent(async tab => {
+chrome.tabs.getCurrent(async (tab) => {
   const testing = !!tab;
   await chrome.storage.local.set({ testing });
   // const opts = isRunningExtensionOnBrowserTab ? E2E_QUERY_TAB_OPTS : QUERY_TAB_OPTS;

@@ -1,5 +1,4 @@
-export const testSuiteStart =
-`/* 
+export const testSuiteStart = `/* 
 This test suite was created using JESTEER, a project developed by 
 Tim Ruszala, Katie Janzen, Clare Cerullo, and Charissa Ramirez.
 
@@ -8,8 +7,7 @@ Learn more at https://github.com/oslabs-beta/Jesteer .
 const puppeteer = require('puppeteer'); // v13.0.0 or later
 `;
 
-export const describeStart = 
-`
+export const describeStart = `
 jest.setTimeout(10000);
 describe('', () => {
 
@@ -36,53 +34,49 @@ await browser.close();
 });
 `;
 
-export const itBlockStart = 
-`
+export const itBlockStart = `
 it('', async () => {
 `;
 
-export const blockEnd =
-`
+export const blockEnd = `
 });
 `;
 
-export const waitForNav =
-`
+export const waitForNav = `
 await page.waitForNavigation();
 `;
 
-export const pressEnter = 
-`
+export const pressEnter = `
 await page.keyboard.press('Enter');
 `;
 
-export const blockEndMultiple = count => blockEnd.repeat(count);
+export const blockEndMultiple = (count) => blockEnd.repeat(count);
 
-export const gotoInitialPage = initialPageURL => (`
+export const gotoInitialPage = (initialPageURL) => (`
 {
 const promises = [];
 promises.push(page.waitForNavigation());
 await page.goto('${initialPageURL}');
 await Promise.all(promises);
 }
-`); 
+`);
 
-export const keyboard = text => (`
+export const keyboard = (text) => (`
 await page.keyboard.type('${text}');
 `);
 
-export const keyboardPress = key => (`
+export const keyboardPress = (key) => (`
 await page.keyboard.press('${key}');
 `);
 
-export const click = selector => (`
+export const click = (selector) => (`
 {
 const element = await page.waitForSelector('${selector}');
 await element.click();
 }
 `);
 
-export const snapshot = selector => (`
+export const snapshot = (selector) => (`
 {
 const snapped = await page.$eval('${selector}', el => el.innerHTML);
 expect(snapped).toMatchSnapshot();

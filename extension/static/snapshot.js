@@ -1,6 +1,3 @@
-/* global getSelectorPath */
-// getSelectorPath is added to the global context in popup.html, from common.js
-
 // Javascript Components for the popup page when the extension icon is clicked
 
 // Injects the event listeners that select/deselect DOM elements

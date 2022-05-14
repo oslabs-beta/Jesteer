@@ -2,7 +2,7 @@
 // For now, comment out the window.close() line in recording.js
 
 const pti = require('puppeteer-to-istanbul');
-const { bootstrap } = require('./bootstrap');
+const { bootstrap } = require('./bootstrap.js');
 
 describe('test test', () => {
   let extPage, appPage, browser;
@@ -10,7 +10,7 @@ describe('test test', () => {
   beforeAll(async () => {
     const context = await bootstrap({
       appUrl: 'https://www.wikipedia.org/',
-      slowMo: 70,
+      slowMo: 100,
       devtools: true,
     });
 

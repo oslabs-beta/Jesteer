@@ -11,24 +11,7 @@ const recordButtonUpdate = (rec) => {
   document.querySelector('#btnRecordValue').innerText = rec ? 'Stop Recording' : 'Record';
 };
 
-// This sets the Record Button to have the correct message on startup
-chrome.storage.local.get('recording', ({ recording }) => {
-  recordButtonUpdate(recording);
-});
-
-// handle clicking the record button
-document.querySelector('#btnRecord').addEventListener('click', async () => {
-  chrome.tabs.getCurrent((tab) => {
-    const isRunningExtensionOnBrowserTab = !!tab;
-    const opts = isRunningExtensionOnBrowserTab ? E2E_QUERY_TAB_OPTS : QUERY_TAB_OPTS;
-    const tabIndex = isRunningExtensionOnBrowserTab ? 1 : 0;
-
-    chrome.tabs.query(opts, (tabs) => execute(tabs[tabIndex]));
-  });
-});
-
 async function execute(tab) {
-  console.log('execute called');
   // Insert code for functions shared across popup
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -51,7 +34,8 @@ async function execute(tab) {
 
     // Dismiss the popup
     // window.close();
-  } else {
+  }
+  else {
     await chrome.runtime.sendMessage({ type: 'log', text: 'attempt to stop recording from recording.js' });
     const { output } = await chrome.runtime.sendMessage({ type: 'stopRecording' });
 
@@ -67,3 +51,19 @@ async function execute(tab) {
     args: [recording],
   });
 }
+
+// This sets the Record Button to have the correct message on startup
+chrome.storage.local.get('recording', ({ recording }) => {
+  recordButtonUpdate(recording);
+});
+
+// handle clicking the record button
+document.querySelector('#btnRecord').addEventListener('click', async () => {
+  chrome.tabs.getCurrent((tab) => {
+    const isRunningExtensionOnBrowserTab = !!tab;
+    const opts = isRunningExtensionOnBrowserTab ? E2E_QUERY_TAB_OPTS : QUERY_TAB_OPTS;
+    const tabIndex = isRunningExtensionOnBrowserTab ? 1 : 0;
+
+    chrome.tabs.query(opts, (tabs) => execute(tabs[tabIndex]));
+  });
+});

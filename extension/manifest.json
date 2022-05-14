@@ -34,6 +34,5 @@
     "48": "/logo/JesteerLogo_48px.png",
     "64": "/logo/JesteerLogo_64px.png",
     "128": "/logo/JesteerLogo_128px.png"
-  },
-  "options_page": "static/options.html"
+  }
 }
