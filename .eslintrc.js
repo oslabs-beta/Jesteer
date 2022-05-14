@@ -15,6 +15,7 @@ module.exports = {
     chrome: false,
   },
   rules: {
+    'import/extensions': ['error', 'always', { ignorePackages: true }],
     'no-restricted-syntax': 'off',
     'no-underscore-dangle': 'off',
     'one-var': 'off',

@@ -1,5 +1,5 @@
 // Handles logic for recording browser actions
-import { toggleListeners } from './toggleListeners';
+import { toggleListeners } from './toggleListeners.js';
 
 // options that help us decide which tab to act on, depending on whether we're testing or not
 const QUERY_TAB_OPTS = { currentWindow: true, active: true };
@@ -17,7 +17,7 @@ chrome.storage.local.get('recording', ({ recording }) => {
 });
 
 // handle clicking the record button
-document.querySelector('#btnSnapshot').addEventListener('click', async () => {
+document.querySelector('#btnRecord').addEventListener('click', async () => {
   chrome.tabs.getCurrent((tab) => {
     const isRunningExtensionOnBrowserTab = !!tab;
     const opts = isRunningExtensionOnBrowserTab ? E2E_QUERY_TAB_OPTS : QUERY_TAB_OPTS;
@@ -28,6 +28,7 @@ document.querySelector('#btnSnapshot').addEventListener('click', async () => {
 });
 
 async function execute(tab) {
+  console.log('execute called');
   // Insert code for functions shared across popup
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
