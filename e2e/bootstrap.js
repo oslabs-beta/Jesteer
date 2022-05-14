@@ -29,7 +29,7 @@ async function bootstrap(options = {}) {
   const [, , extensionId] = partialExtensionUrl.split('/');
 
   const extPage = await browser.newPage();
-  const extensionUrl = `chrome-extension://${extensionId}/static/popup.html`;
+  const extensionUrl = `chrome-extension://${extensionId}/popup/popup.html`;
   await extPage.goto(extensionUrl, { waitUntil: 'load' });
 
   return {
