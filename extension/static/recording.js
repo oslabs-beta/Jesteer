@@ -1,9 +1,7 @@
 // Handles logic for recording browser actions
 import { toggleListeners } from './toggleListeners.js';
 
-// options that help us decide which tab to act on, depending on whether we're testing or not
-const QUERY_TAB_OPTS = { currentWindow: true, active: true };
-const E2E_QUERY_TAB_OPTS = { currentWindow: true, active: false };
+
 
 // Toggles the text on the Record Button to reflect the given Recording Status rec
 const recordButtonUpdate = (rec) => {
@@ -29,11 +27,13 @@ async function execute(tab) {
   // Set the new value in storage
   await chrome.storage.local.set({ recording });
   if (recording) {
-    await chrome.runtime.sendMessage({ type: 'log', text: `URL: ${tab.url}`});
+    await chrome.runtime.sendMessage({ type: 'log', text: `URL: ${tab.url}` });
     await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'initialURL', url: tab.url } });
 
-    // Dismiss the popup
-    // window.close();
+    // Dismiss the popup if not testing
+    if (navigator.userAgent !== 'PuppeteerAgent') {
+      window.close();
+    }
   }
   else {
     await chrome.runtime.sendMessage({ type: 'log', text: 'attempt to stop recording from recording.js' });
@@ -59,7 +59,11 @@ chrome.storage.local.get('recording', ({ recording }) => {
 
 // handle clicking the record button
 document.querySelector('#btnRecord').addEventListener('click', async () => {
-  chrome.tabs.getCurrent((tab) => {
+  // options that help us decide which tab to act on, depending on whether we're testing or not
+  const QUERY_TAB_OPTS = { currentWindow: true, active: true };
+  const E2E_QUERY_TAB_OPTS = { currentWindow: true, active: false };
+
+  chrome.tabs.getCurrent(async (tab) => {
     const isRunningExtensionOnBrowserTab = !!tab;
     const opts = isRunningExtensionOnBrowserTab ? E2E_QUERY_TAB_OPTS : QUERY_TAB_OPTS;
     const tabIndex = isRunningExtensionOnBrowserTab ? 1 : 0;
@@ -67,3 +71,5 @@ document.querySelector('#btnRecord').addEventListener('click', async () => {
     chrome.tabs.query(opts, (tabs) => execute(tabs[tabIndex]));
   });
 });
+
+// 'finish first round of testing, set up testing suite, write code to differentiate between when app is being tested, and when it is being run as a chrome extension'

@@ -1,56 +1,69 @@
-// note: to test, you have to prevent the popup from closing.
-// For now, comment out the window.close() line in recording.js
-
-const pti = require('puppeteer-to-istanbul');
+// const pti = require('puppeteer-to-istanbul');
 const { bootstrap } = require('./bootstrap.js');
 
 describe('test test', () => {
   let extPage, appPage, browser;
 
   beforeAll(async () => {
+    // const context = await bootstrap({
+    //   appUrl: 'https://www.wikipedia.org/',
+    //   slowMo: 150,
+    //   devtools: true,
+    // });
+
+    // extPage = context.extPage;
+    // appPage = context.appPage;
+    // browser = context.browser;
+
+    // await Promise.all([
+    //   extPage.coverage.startJSCoverage(),
+    //   extPage.coverage.startCSSCoverage(),
+    // ]);
+  });
+
+  beforeEach(async () => {
     const context = await bootstrap({
       appUrl: 'https://www.wikipedia.org/',
-      slowMo: 100,
+      // make sure to have some slowMo to avoid a race-condition, causing tests to unexpectedly fail
+      slowMo: 150,
       devtools: true,
     });
 
     extPage = context.extPage;
     appPage = context.appPage;
     browser = context.browser;
-
-    await Promise.all([
-      extPage.coverage.startJSCoverage(),
-      extPage.coverage.startCSSCoverage(),
-    ]);
   });
 
-  afterAll(async () => {
-    // measure code coverage with istanbul
-    const [jsCoverage, cssCoverage] = await Promise.all([
-      extPage.coverage.stopJSCoverage(),
-      extPage.coverage.stopCSSCoverage(),
-    ]);
-    let totalBytes = 0;
-    let usedBytes = 0;
-    const coverage = [...jsCoverage, ...cssCoverage];
-
-    for (const entry of coverage) {
-      totalBytes += entry.text.length;
-      for (const range of entry.ranges) {
-        usedBytes += range.end - range.start - 1;
-      }
-    }
-
-    // eslint-disable-next-line
-    console.log(`Bytes used: ${(usedBytes / totalBytes) * 100}%`);
-
-    pti.write([...jsCoverage, ...cssCoverage], {
-      includeHostname: true,
-      storagePath: './.nyc_output',
-    });
-
+  afterEach(async () => {
     await browser.close();
   });
+
+  // afterAll(async () => {
+  //   // measure code coverage with istanbul
+  //   const [jsCoverage, cssCoverage] = await Promise.all([
+  //     extPage.coverage.stopJSCoverage(),
+  //     extPage.coverage.stopCSSCoverage(),
+  //   ]);
+  //   let totalBytes = 0;
+  //   let usedBytes = 0;
+  //   const coverage = [...jsCoverage, ...cssCoverage];
+
+  //   for (const entry of coverage) {
+  //     totalBytes += entry.text.length;
+  //     for (const range of entry.ranges) {
+  //       usedBytes += range.end - range.start - 1;
+  //     }
+  //   }
+
+  // // eslint-disable-next-line
+  // console.log(`Bytes used: ${(usedBytes / totalBytes) * 100}%`);
+
+  // pti.write([...jsCoverage, ...cssCoverage], {
+  //   includeHostname: true,
+  //   storagePath: './.nyc_output',
+  // });
+
+  // });
 
   it('should click on the search box, i.e. wikipedia should load', async () => {
     appPage.bringToFront();
@@ -81,7 +94,7 @@ describe('test test', () => {
     // expect(await extPage.waitForFunction(`document.querySelector('#btnRecord').innerText === 'Recording'`)).toBeTruthy();
   });
 
-  it.only('should record a very simple browser interaction', async () => {
+  it('should record a very simple browser interaction', async () => {
     await extPage.bringToFront();
     await extPage.waitForSelector('#btnRecord');
     let btnRecord = await extPage.$('#btnRecord');
@@ -221,11 +234,6 @@ const promises = [];
 promises.push(page.waitForNavigation());
 await page.goto('https://www.wikipedia.org/');
 await Promise.all(promises);
-}
-
-{
-const element = await page.waitForSelector('#www-wikipedia-org > DIV:nth-child(8) > DIV:nth-child(1) > DIV:nth-child(1) > DIV:nth-child(2)');
-await element.click();
 }
 
 {
