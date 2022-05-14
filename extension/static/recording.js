@@ -1,8 +1,6 @@
 // Handles logic for recording browser actions
 import { toggleListeners } from './toggleListeners.js';
 
-
-
 // Toggles the text on the Record Button to reflect the given Recording Status rec
 const recordButtonUpdate = (rec) => {
   document.querySelector('#btnSnapshot').disabled = !rec;
@@ -71,5 +69,3 @@ document.querySelector('#btnRecord').addEventListener('click', async () => {
     chrome.tabs.query(opts, (tabs) => execute(tabs[tabIndex]));
   });
 });
-
-// 'finish first round of testing, set up testing suite, write code to differentiate between when app is being tested, and when it is being run as a chrome extension'

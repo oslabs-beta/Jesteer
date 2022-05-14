@@ -1,25 +1,25 @@
 // const pti = require('puppeteer-to-istanbul');
 const { bootstrap } = require('./bootstrap.js');
 
-describe('test test', () => {
+describe('Popup Functionality', () => {
   let extPage, appPage, browser;
 
-  beforeAll(async () => {
-    // const context = await bootstrap({
-    //   appUrl: 'https://www.wikipedia.org/',
-    //   slowMo: 150,
-    //   devtools: true,
-    // });
+  // beforeAll(async () => {
+  //   // const context = await bootstrap({
+  //   //   appUrl: 'https://www.wikipedia.org/',
+  //   //   slowMo: 150,
+  //   //   devtools: true,
+  //   // });
 
-    // extPage = context.extPage;
-    // appPage = context.appPage;
-    // browser = context.browser;
+  //   // extPage = context.extPage;
+  //   // appPage = context.appPage;
+  //   // browser = context.browser;
 
-    // await Promise.all([
-    //   extPage.coverage.startJSCoverage(),
-    //   extPage.coverage.startCSSCoverage(),
-    // ]);
-  });
+  //   // await Promise.all([
+  //   //   extPage.coverage.startJSCoverage(),
+  //   //   extPage.coverage.startCSSCoverage(),
+  //   // ]);
+  // });
 
   beforeEach(async () => {
     const context = await bootstrap({
@@ -165,14 +165,6 @@ await element.click();
     expect(output).toBe(expectedOutput);
   });
 
-  // Ext page to front
-  // Click record
-  // Click snapshot
-  // App page to front
-  // Click on an element
-  // Ext page to front
-  // Stop recording
-
   it('should take a snapshot of the selected element', async () => {
     await extPage.bringToFront();
     await extPage.waitForSelector('#btnRecord');
@@ -247,8 +239,4 @@ expect(snapped).toMatchSnapshot();
 `;
     expect(output).toBe(expectedOutput);
   });
-
-  // it("env", () => {
-  //   expect(process.env.FOO).toBe("FOO");
-  // })
 });
