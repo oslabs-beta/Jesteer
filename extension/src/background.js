@@ -40,21 +40,25 @@ function handleRecordAction(action) {
 // When we stop recording, we go through all actions in the actions queue and use them to
 // build out the test suite.
 function processActionsQueue() {
-  console.log(
-    'processActionsQueue called, actions queue was:',
-    JSON.stringify(actions),
-  );
-  let outputString = '';
+  let outputString = templates.testSuiteStart
+    + templates.describeStart
+    + templates.itBlockStart;
+  
+  if (actions[0].type !== 'initialURL') {
+    // Handle the occasional edge case where a recording fails to start correctly
+    // Construct an initialURL action object and put it at the front of the actions queue
+    // This action will have a comment in place of the URL asking the tester to replace it with the Initial Page URL
+    // This is a nice failure mode in the unfortunate event we don't fully stop this from ocurring before launch
+    actions.unshift({
+      type: 'initialURL',
+      url: '/* This URL failed to generate as a part of the recording process. Please replace this comment with the Initial Page URL. */'
+    });
+  }
 
   for (const action of actions) {
     switch (action.type) {
-      case 'start':
-        outputString
-          += templates.testSuiteStart
-          + templates.describeStart
-          + templates.itBlockStart
-          + templates.gotoInitialPage(action.url);
-        break;
+      case 'initialURL':
+        outputString += templates.gotoInitialPage(action.url);
 
       case 'keyboard':
         outputString += templates.keyboard(action.text);
@@ -94,7 +98,7 @@ chrome.runtime.onStartup.addListener(() => {
   // Set a value in the extension local storage
 
   console.log('onStartup event received.');
-  chrome.storage.local.set({ recording: false });
+  chrome.storage.local.set({ recording: false, currentTest: '' });
 });
 
 // Check for page navigation
