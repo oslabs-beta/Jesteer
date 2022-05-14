@@ -1,5 +1,5 @@
 // Handles logic for recording browser actions
-import { toggleListeners } from './toggleListeners.js';
+import { toggleListeners } from '../content_scripts/toggleListeners.js';
 
 // Toggles the text on the Record Button to reflect the given Recording Status rec
 const recordButtonUpdate = (rec) => {
@@ -11,7 +11,7 @@ async function execute(tab) {
   // Insert code for functions shared across popup
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    files: ['static/common.js'],
+    files: ['content_scripts/common.js'],
   });
 
   // Get the current recording state

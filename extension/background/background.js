@@ -1,12 +1,10 @@
 /* eslint no-console: "off" */
 
 import * as templates from './templates.js';
-import { toggleListeners } from '../static/toggleListeners.js';
+import { toggleListeners } from '../content_scripts/toggleListeners.js';
 
 const testingStatus = (navigator.userAgent === 'PuppeteerAgent');
 console.log('TESTING:', testingStatus);
-
-// console.log("navigator.userAgent", navigator.userAgent);
 
 // current actions acts as a queue containing the actions performed on the page while recording,
 // including clicks and snapshots.

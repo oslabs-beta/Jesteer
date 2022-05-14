@@ -4,7 +4,7 @@
   "version": "0.0.0.1",
   "manifest_version": 3,
   "background": {
-    "service_worker": "src/background.js",
+    "service_worker": "background/background.js",
     "type": "module"
   },
   "permissions": [
@@ -19,7 +19,7 @@
     "<all_urls>"
   ],
   "action": {
-    "default_popup": "static/popup.html",
+    "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "/logo/JesteerLogo_16px.png",
       "32": "/logo/JesteerLogo_32px.png",
