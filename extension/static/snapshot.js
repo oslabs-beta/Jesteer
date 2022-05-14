@@ -29,9 +29,21 @@ function prepareSnapshot() {
 }
 
 const btnSnapshot = document.querySelector('#btnSnapshot');
+
 btnSnapshot.addEventListener('click', async () => {
-  // Get activeTab
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const testing = (navigator.userAgent === 'PuppeteerAgent');
+
+  let tab;
+  if (testing) {
+    const tabs = (await chrome.tabs.query({ currentWindow: true, active: false }));
+    const index = 1; // when testing, popup.html is at tab index 1
+    tab = tabs[index];
+  }
+  else {
+    const tabs = (await chrome.tabs.query({ currentWindow: true, active: true }));
+    const index = 0; // when not testing, popup.html is at tab index 0
+    tab = tabs[index];
+  }
 
   // Execute the 'snapshot' function in the context of the current webpage
   chrome.scripting.executeScript({
@@ -40,12 +52,13 @@ btnSnapshot.addEventListener('click', async () => {
   });
 
   // Add styling to the attribute given to elements we're hovering over
-  // TODO: Undo this on stop snapshot
   chrome.scripting.insertCSS({
     target: { tabId: tab.id },
     css: '*[___jesteer___highlight] { background-color: yellow !important; }',
   });
 
-  // Dismiss the popup
-  // window.close();
+  // Dismiss the popup if not testing
+  if (navigator.userAgent !== 'PuppeteerAgent') {
+    window.close();
+  }
 });

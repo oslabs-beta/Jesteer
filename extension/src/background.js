@@ -43,15 +43,15 @@ function processActionsQueue() {
   let outputString = templates.testSuiteStart
     + templates.describeStart
     + templates.itBlockStart;
-  
+
   if (actions[0].type !== 'initialURL') {
     // Handle the occasional edge case where a recording fails to start correctly
     // Construct an initialURL action object and put it at the front of the actions queue
-    // This action will have a comment in place of the URL asking the tester to replace it with the Initial Page URL
-    // This is a nice failure mode in the unfortunate event we don't fully stop this from ocurring before launch
+    // This will write a comment asking the tester to replace it with the Initial Page URL
+    // This is a better way to fail than not generating a test at all
     actions.unshift({
       type: 'initialURL',
-      url: '/* This URL failed to generate as a part of the recording process. Please replace this comment with the Initial Page URL. */'
+      url: '/* This URL failed to generate as a part of the recording process. Please replace this comment with the Initial Page URL. */',
     });
   }
 
@@ -59,6 +59,7 @@ function processActionsQueue() {
     switch (action.type) {
       case 'initialURL':
         outputString += templates.gotoInitialPage(action.url);
+        break;
 
       case 'keyboard':
         outputString += templates.keyboard(action.text);
