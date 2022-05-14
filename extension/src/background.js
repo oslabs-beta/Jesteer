@@ -77,7 +77,6 @@ function processActionsQueue() {
         break;
 
       default:
-        /* eslint-disable-next-line */
         console.warn('Unknown action received. (action ignored.) action:', JSON.stringify(action));
         break;
     }
