@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[` https://nodejs.dev/learn/working-with-folders-in-nodejs 1`] = `"Making HTTP requests with Node.js"`;
-
-exports[` https://www.wikipedia.org/ 1`] = `"TIM"`;
