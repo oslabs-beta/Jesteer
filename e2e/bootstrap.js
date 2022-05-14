@@ -11,15 +11,20 @@ async function bootstrap(options = {}) {
     args: [
       '--disable-extensions-except=./extension',
       '--load-extension=./extension',
+      '--user-agent=PuppeteerAgent',
     ],
     ...(slowMo && { slowMo }),
   });
 
   const appPage = await browser.newPage();
+  // const pages = await browser.pages();
+  // const appPage = pages[0];
   await appPage.goto(appUrl, { waitUntil: 'load' });
 
   const targets = await browser.targets();
-  const extensionTarget = targets.find(target => target.type() === 'service_worker');
+  const extensionTarget = targets.find(
+    (target) => target.type() === 'service_worker',
+  );
   const partialExtensionUrl = extensionTarget._targetInfo.url || '';
   const [, , extensionId] = partialExtensionUrl.split('/');
 

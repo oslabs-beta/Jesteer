@@ -1,7 +1,12 @@
+/* eslint no-console: "off" */
+
 import * as templates from './templates.js';
 import { toggleListeners } from '../static/toggleListeners.js';
 
-// Initialize on Start
+const testingStatus = (navigator.userAgent === 'PuppeteerAgent');
+console.log('TESTING:', testingStatus);
+
+// console.log("navigator.userAgent", navigator.userAgent);
 
 // current actions acts as a queue containing the actions performed on the page while recording,
 // including clicks and snapshots.
@@ -17,7 +22,10 @@ function flushKeyBuffer() {
 }
 
 function handleRecordAction(action) {
-  console.log('handleRecordAction called, action was:', JSON.stringify(action));
+  console.log(
+    'handleRecordAction called, action was:',
+    JSON.stringify(action),
+  );
   // adds a type action to the actions queue, with whatever had last been typed
   flushKeyBuffer();
 
@@ -32,18 +40,20 @@ function handleRecordAction(action) {
 // When we stop recording, we go through all actions in the actions queue and use them to
 // build out the test suite.
 function processActionsQueue() {
-  console.log('processActionsQueue called, actions queue was:', JSON.stringify(actions));
+  console.log(
+    'processActionsQueue called, actions queue was:',
+    JSON.stringify(actions),
+  );
   let outputString = '';
 
-  for (let action of actions) {
+  for (const action of actions) {
     switch (action.type) {
       case 'start':
-        outputString += (
-          templates.testSuiteStart
+        outputString
+          += templates.testSuiteStart
           + templates.describeStart
           + templates.itBlockStart
-          + templates.gotoInitialPage(action.url)
-        );
+          + templates.gotoInitialPage(action.url);
         break;
 
       case 'keyboard':
@@ -67,15 +77,11 @@ function processActionsQueue() {
         break;
 
       default:
-        console.log('ERROR: Unknown action', action);
-        sendResponse({ ok: false });
-        return;
+        break;
     }
   }
 
   outputString += templates.blockEndMultiple(2);
-
-  console.log('outputString:', outputString);
 
   actions = [];
 
@@ -86,12 +92,13 @@ function processActionsQueue() {
 // Initialize our state to reflect that we are not yet recording on extension startup
 chrome.runtime.onStartup.addListener(() => {
   // Set a value in the extension local storage
+
   console.log('onStartup event received.');
   chrome.storage.local.set({ recording: false });
 });
 
 // Check for page navigation
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener((tabId, changeInfo /* , tab */) => {
   // read changeInfo data to see if url changed
   if (changeInfo.url) {
     // do something here
@@ -105,21 +112,20 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         // Insert code for functions shared across popup
         chrome.scripting.executeScript({
           target: { tabId },
-          files: ['static/common.js']
+          files: ['static/common.js'],
         });
 
         // turn off existing event listeners
         chrome.scripting.executeScript({
           target: { tabId },
           function: toggleListeners,
-          args: [false]
+          args: [false],
         });
 
-        // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
         chrome.scripting.executeScript({
           target: { tabId },
           function: toggleListeners,
-          args: [true]
+          args: [true],
         });
       }
     });
@@ -127,37 +133,42 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 });
 
 // Listen for messages sent from elsewhere across the extension
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // handle messages based on their type
   switch (message.type) {
-
     // handle a keypress
     case 'keydown':
-      console.log('Keydown event: ' + message.key);
+      console.log(`Keydown event: ${message.key}`);
 
       if (message.key.length > 1) {
-        handleRecordAction({ type: 'keyboardPress', key: message.key })
-      } else {
-        if (message.key === `\\`) keysPressed += '\\\\'
-        else keysPressed += message.key;
+        handleRecordAction({ type: 'keyboardPress', key: message.key });
+      }
+      else if (message.key === '\\') {
+        keysPressed += '\\\\';
+      }
+      else {
+        keysPressed += message.key;
       }
       sendResponse({ ok: true });
       break;
 
-    // when the user interacts with the webpage, whatever they interact with is emitted as a 'recordAction' message
+    // when the user interacts with the webpage, whatever they interact with
+    // is emitted as a 'recordAction' message
     case 'recordAction':
       handleRecordAction(message.action);
       sendResponse({ ok: true });
       break;
 
     // user clicks the 'stop recording button'
-    case 'stopRecording': {
-      // Compile the final file for output
-      console.log('stopping recording...');
-      flushKeyBuffer();
-      const outputString = processActionsQueue();
-      sendResponse({ ok: true, output: outputString });
-    } break;
+    case 'stopRecording':
+      {
+        // Compile the final file for output
+        console.log('stopping recording...');
+        flushKeyBuffer();
+        const outputString = processActionsQueue();
+        sendResponse({ ok: true, output: outputString });
+      }
+      break;
 
     // Log something to the Service Worker Console
     case 'log':
@@ -167,7 +178,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
     // Received unknown message
     default:
-      console.log('Received Unknown Message')
+      console.log('Received Unknown Message');
       sendResponse({ ok: false });
       break;
   }
