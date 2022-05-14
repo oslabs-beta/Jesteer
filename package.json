@@ -4,7 +4,7 @@
     "puppeteer": "^13.7.0"
   },
   "scripts": {
-    "test": "jest sampleTest.spec.js "
+    "test": "jest extension.spec.js "
   },
   "devDependencies": {
     "eslint": "^8.15.0",

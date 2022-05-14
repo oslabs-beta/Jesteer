@@ -52,13 +52,13 @@ describe('test test', () => {
     await browser.close();
   });
 
-  xit('should click on the search box, i.e. wikipedia should load', async () => {
+  it('should click on the search box, i.e. wikipedia should load', async () => {
     appPage.bringToFront();
     const searchBox = await appPage.$('#searchInput');
     await searchBox.click();
   });
 
-  xit('should record and then stop recording', async () => {
+  it('should record and then stop recording', async () => {
     extPage.bringToFront();
     const btnRecord = await extPage.$('#btnRecord');
     await extPage.waitForFunction(
@@ -81,7 +81,7 @@ describe('test test', () => {
     // expect(await extPage.waitForFunction(`document.querySelector('#btnRecord').innerText === 'Recording'`)).toBeTruthy();
   });
 
-  it('should record a very simple browser interaction', async () => {
+  it.only('should record a very simple browser interaction', async () => {
     await extPage.bringToFront();
     await extPage.waitForSelector('#btnRecord');
     let btnRecord = await extPage.$('#btnRecord');
@@ -160,7 +160,7 @@ await element.click();
   // Ext page to front
   // Stop recording
 
-  xit('should take a snapshot of the selected element', async () => {
+  it('should take a snapshot of the selected element', async () => {
     await extPage.bringToFront();
     await extPage.waitForSelector('#btnRecord');
     let btnRecord = await extPage.$('#btnRecord');
