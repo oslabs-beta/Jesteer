@@ -7,42 +7,50 @@ const recordButtonUpdate = (rec) => {
   document.querySelector('#btnRecordValue').innerText = rec ? 'Stop Recording' : 'Record';
 };
 
+// main function to be executed when record button is pressed
 async function execute(tab) {
+  // Toggle recording status and save in local storage
+  let { recording } = await chrome.storage.local.get({ recording: false });
+  recording = !recording;
+  await chrome.storage.local.set({ recording });
+  // Update the recording button
+  recordButtonUpdate(recording);
+
+  // click 'Record'
+  if (recording) {
+    // send 'initialURL' action to background.js, telling Jesteer to insert
+    // a page.goto(${ initialURL }) command
+    await chrome.runtime.sendMessage({ type: 'log', text: `initialURL: ${tab.url}` });
+    await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'initialURL', url: tab.url } });
+
+    // if not testing, dismiss the popup
+    if (navigator.userAgent !== 'PuppeteerAgent') {
+      window.close();
+    }
+  }
+
+  // click 'Stop recording'
+  else {
+    // send stopRecording message to background.js
+    await chrome.runtime.sendMessage({ type: 'log', text: 'attempt to stop recording from recording.js' });
+
+    // sending the stopRecording message will trigger a generated test suite as a response
+    const { output } = await chrome.runtime.sendMessage({ type: 'stopRecording' });
+
+    // populate codegen box with the generated test suite
+    document.querySelector('#codegen').value = output;
+
+    // save the generated test suite in Chrome's local memory
+    await chrome.storage.local.set({ currentTest: output });
+  }
+
   // Insert code for functions shared across popup
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
     files: ['content_scripts/common.js'],
   });
 
-  // Get the current recording state
-  let { recording } = await chrome.storage.local.get({ recording: false });
-  // Toggle recording status (false -> true / true -> false)
-  recording = !recording;
-
-  // Update the recording button to match
-  recordButtonUpdate(recording);
-
-  // Set the new value in storage
-  await chrome.storage.local.set({ recording });
-  if (recording) {
-    await chrome.runtime.sendMessage({ type: 'log', text: `URL: ${tab.url}` });
-    await chrome.runtime.sendMessage({ type: 'recordAction', action: { type: 'initialURL', url: tab.url } });
-
-    // Dismiss the popup if not testing
-    if (navigator.userAgent !== 'PuppeteerAgent') {
-      window.close();
-    }
-  }
-  else {
-    await chrome.runtime.sendMessage({ type: 'log', text: 'attempt to stop recording from recording.js' });
-    const { output } = await chrome.runtime.sendMessage({ type: 'stopRecording' });
-
-    document.querySelector('#codegen').value = output;
-
-    await chrome.storage.local.set({ currentTest: output });
-  }
-
-  // Tell Chrome to execute our script, which injects the needed EventListeners into current webpage
+  // Tell Chrome to inject event listeners into current page, which will record browser interactions
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     function: toggleListeners,
@@ -50,12 +58,13 @@ async function execute(tab) {
   });
 }
 
-// This sets the Record Button to have the correct message on startup
+// Populate record button with correct message, depending on recording status
 chrome.storage.local.get('recording', ({ recording }) => {
   recordButtonUpdate(recording);
 });
 
-// handle clicking the record button
+// add event listener for clicking record Button
+// acts slightly differently depending on whether or not we are testing
 document.querySelector('#btnRecord').addEventListener('click', async () => {
   // options that help us decide which tab to act on, depending on whether we're testing or not
   const QUERY_TAB_OPTS = { currentWindow: true, active: true };
@@ -63,6 +72,7 @@ document.querySelector('#btnRecord').addEventListener('click', async () => {
 
   chrome.tabs.getCurrent(async (tab) => {
     const isRunningExtensionOnBrowserTab = !!tab;
+    // when testing, the extension popup runs in a separate browser tab
     const opts = isRunningExtensionOnBrowserTab ? E2E_QUERY_TAB_OPTS : QUERY_TAB_OPTS;
     const tabIndex = isRunningExtensionOnBrowserTab ? 1 : 0;
 

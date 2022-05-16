@@ -5,3 +5,4 @@ extension.pem
 *.crx
 coverage
 .nyc_output
+generated_tests

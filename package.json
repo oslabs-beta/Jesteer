@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "jest": "^28.0.3",
-    "puppeteer": "^13.7.0"
+    "puppeteer": "^13.7.0",
+    "sass": "^1.51.0"
   },
   "scripts": {
     "test": "jest extension.spec.js "
