@@ -1,10 +1,7 @@
-/* eslint no-console: "off" */
+/* eslint no-console: off */
 
 import * as templates from './templates.js';
 import { toggleListeners } from '../content_scripts/toggleListeners.js';
-
-const testingStatus = (navigator.userAgent === 'PuppeteerAgent');
-console.log('TESTING:', testingStatus);
 
 // current actions acts as a queue containing the actions performed on the page while recording,
 // including clicks and snapshots.
@@ -12,7 +9,6 @@ let actions = [];
 let keysPressed = '';
 
 function flushKeyBuffer() {
-  console.log('flushKeyBuffer called, buffer was:', keysPressed);
   if (keysPressed) {
     actions.push({ type: 'keyboard', text: keysPressed });
     keysPressed = '';
@@ -20,10 +16,6 @@ function flushKeyBuffer() {
 }
 
 function handleRecordAction(action) {
-  console.log(
-    'handleRecordAction called, action was:',
-    JSON.stringify(action),
-  );
   // adds a type action to the actions queue, with whatever had last been typed
   flushKeyBuffer();
 
@@ -95,8 +87,6 @@ function processActionsQueue() {
 // Initialize our state to reflect that we are not yet recording on extension startup
 chrome.runtime.onStartup.addListener(() => {
   // Set a value in the extension local storage
-
-  console.log('onStartup event received.');
   chrome.storage.local.set({ recording: false, currentTest: '' });
 });
 
@@ -104,18 +94,15 @@ chrome.runtime.onStartup.addListener(() => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo /* , tab */) => {
   // read changeInfo data to see if url changed
   if (changeInfo.url) {
-    // do something here
-    console.log('Navigated to a new page. tabId:', tabId);
     chrome.storage.local.get('recording', async ({ recording }) => {
       if (recording) {
         const navigationAction = { type: 'navigation' };
         handleRecordAction(navigationAction);
 
-        // below code was copied from recording.js
         // Insert code for functions shared across popup
         chrome.scripting.executeScript({
           target: { tabId },
-          files: ['static/common.js'],
+          files: ['content_scripts/common.js'],
         });
 
         // turn off existing event listeners
@@ -125,6 +112,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo /* , tab */) => {
           args: [false],
         });
 
+        // turn event listeners back on (fresh start)
         chrome.scripting.executeScript({
           target: { tabId },
           function: toggleListeners,
@@ -141,8 +129,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     // handle a keypress
     case 'keydown':
-      console.log(`Keydown event: ${message.key}`);
-
       if (message.key.length > 1) {
         handleRecordAction({ type: 'keyboardPress', key: message.key });
       }
@@ -166,7 +152,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'stopRecording':
       {
         // Compile the final file for output
-        console.log('stopping recording...');
         flushKeyBuffer();
         const outputString = processActionsQueue();
         sendResponse({ ok: true, output: outputString });

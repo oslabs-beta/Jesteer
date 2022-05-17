@@ -1,3 +1,10 @@
+/*
+When you test, be sure to add tabs permissions to manifest.json.
+For production, we only need activeTab, so the published extension
+does not ask for tabs permission. The testing set-up, however, *does*
+need tabs permission.
+*/
+
 // const pti = require('puppeteer-to-istanbul');
 const { bootstrap } = require('./bootstrap.js');
 
@@ -86,12 +93,6 @@ describe('Popup Functionality', () => {
         'document.querySelector(\'#btnRecord\').innerText === \'Stop Recording\'',
       ),
     ).toBeTruthy();
-
-    // why isn't this working!
-    // await btnRecord.click();
-
-    // eslint-disable-next-line
-    // expect(await extPage.waitForFunction(`document.querySelector('#btnRecord').innerText === 'Recording'`)).toBeTruthy();
   });
 
   it('should record a very simple browser interaction', async () => {
