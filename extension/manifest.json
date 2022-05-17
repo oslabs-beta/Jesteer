@@ -1,6 +1,6 @@
 {
   "name": "Jesteer",
-  "description": "Imagine a world where tests write themselves",
+  "description": "Imagine a world where tests write themselves.",
   "version": "0.0.0.1",
   "manifest_version": 3,
   "background": {
@@ -10,10 +10,7 @@
   "permissions": [
     "storage",
     "activeTab",
-    "tabs",
-    "scripting",
-    "downloads",
-    "webNavigation"
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"
