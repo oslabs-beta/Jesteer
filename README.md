@@ -18,7 +18,7 @@ Accelarated by OS Labs.
 
 <p align="center">
   <img 
-    src="./splash/public/img/640PX.gif" alt="Jesteer logo"
+    src="./splash/public/img/640px.gif" alt="Jesteer logo"
   >
 </p>
 
