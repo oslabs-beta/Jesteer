@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap');
+
+* {
+	margin: 0;
+	padding: 0;
+	font-family: 'Inter', sans-serif;
+}
+
+html, body {
+	scroll-behavior: smooth;
+	box-sizing: border-box;
+	font-size: 62.5%;
+}
+
+body {
+	color: #000;
+	font-size: 2rem;
+	background-image: linear-gradient(rgba(204, 0, 0, 0.4), rgba(0, 174, 142, 0.4), rgba(0, 146, 58, 0.4)), url("./img/noise-lines.png");
+}
+
+.container {
+	width: 80%;
+	height: 100vh;
+	margin: auto;
+}
+
+a {
+	color: #000;
+	text-decoration: none;
+}
